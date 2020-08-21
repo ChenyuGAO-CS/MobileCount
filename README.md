@@ -2,7 +2,7 @@
 
 ---
 
-This repo is the official implementation of paper: MobileCount: An efficient encoder-decoder framework for real-time crowd counting.
+This repo is the official implementation of paper: "[MobileCount: An efficient encoder-decoder framework for real-time crowd counting.](https://www.sciencedirect.com/science/article/pii/S0925231220308912)" 
 The code is developed based on C^3 Framework.
 
 ## C^3 Framework's Technical Blog
