@@ -3,10 +3,8 @@
 ---
 
 This repo is the official implementation of paper: "[MobileCount: An efficient encoder-decoder framework for real-time crowd counting.](https://www.sciencedirect.com/science/article/pii/S0925231220308912)" 
-The code is developed based on C^3 Framework.
 
-## C^3 Framework's Technical Blog
-- [2019.05] [Chinese Blog] C^3 Framework系列之一：一个基于PyTorch的开源人群计数框架 [[Link](https://zhuanlan.zhihu.com/p/65650998)]
+The code is developed based on C^3 Framework.
 
 
 ## Features
