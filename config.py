@@ -20,7 +20,7 @@ if __C.DATASET == 'GCC':# only for GCC
 	__C.VAL_MODE = cfg_data.VAL_MODE 
 
 
-__C.NET = 'MobLWRN' # net selection: Mobv2, MobLWRN, RFN, ShufLWRN, CSRNet,FPN
+__C.NET = 'MobileCount' # net selection: MobileCount, MobileCountx1_25, MobileCountx2
 
 __C.PRE_GCC = False # use the pretrained model on GCC dataset
 __C.PRE_GCC_MODEL = './exp/04-06_16-19_GCC_CSRNet_0.0001_rd/all_ep_130_mae_34.9_mse_71.9.pth' # path to model

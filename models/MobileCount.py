@@ -122,13 +122,13 @@ class Bottleneck(nn.Module):
         return out
 
 
-class MobileNetLWRF(nn.Module):
+class MobileCount(nn.Module):
 
     def __init__(self, num_classes=1, pretrained=False):
         self.inplanes = 32
         block = Bottleneck
         layers = [1, 2, 3, 4]
-        super(MobileNetLWRF, self).__init__()
+        super(MobileCount, self).__init__()
 
         # implement of mobileNetv2
         # self.conv1 = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3,

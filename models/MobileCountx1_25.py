@@ -122,52 +122,52 @@ class Bottleneck(nn.Module):
         return out
 
 
-class MobileNetLWRF(nn.Module):
+class MobileCount(nn.Module):
 
     def __init__(self, num_classes=1, pretrained=False):
-        self.inplanes = 32
+        self.inplanes = 64
         block = Bottleneck
         layers = [1, 2, 3, 4]
-        super(MobileNetLWRF, self).__init__()
+        super(MobileCount, self).__init__()
 
         # implement of mobileNetv2
         # self.conv1 = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3,
         #                        bias=False)
 
-        self.conv1 = nn.Conv2d(3, 32, kernel_size=3, stride=2, padding=1, bias=False)
-        self.bn1 = nn.BatchNorm2d(32)
+        self.conv1 = nn.Conv2d(3, 64, kernel_size=3, stride=2, padding=1, bias=False)
+        self.bn1 = nn.BatchNorm2d(64)
         self.relu = nn.ReLU(inplace=True)
 
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
-        self.layer1 = self._make_layer(block, 32, layers[0], stride=1, expansion=1)
-        self.layer2 = self._make_layer(block, 64, layers[1], stride=2, expansion=6)
-        self.layer3 = self._make_layer(block, 128, layers[2], stride=2, expansion=6)
-        self.layer4 = self._make_layer(block, 256, layers[3], stride=2, expansion=6)
+        self.layer1 = self._make_layer(block, 64, layers[0], stride=1, expansion=1)
+        self.layer2 = self._make_layer(block, 96, layers[1], stride=2, expansion=6)
+        self.layer3 = self._make_layer(block, 160, layers[2], stride=2, expansion=6)
+        self.layer4 = self._make_layer(block, 320, layers[3], stride=2, expansion=6)
 
         self.dropout4 = nn.Dropout(p=0.5)
-        self.p_ims1d2_outl1_dimred = conv1x1(256, 64, bias=False)
-        self.mflow_conv_g1_pool = self._make_crp(64, 64, 4)
-        self.mflow_conv_g1_b3_joint_varout_dimred = conv1x1(64, 32, bias=False)
+        self.p_ims1d2_outl1_dimred = conv1x1(320, 96, bias=False)
+        self.mflow_conv_g1_pool = self._make_crp(96, 96, 4)
+        self.mflow_conv_g1_b3_joint_varout_dimred = conv1x1(96, 64, bias=False)
 
         self.dropout3 = nn.Dropout(p=0.5)
-        self.p_ims1d2_outl2_dimred = conv1x1(128, 32, bias=False)
-        self.adapt_stage2_b2_joint_varout_dimred = conv1x1(32, 32, bias=False)
-        self.mflow_conv_g2_pool = self._make_crp(32, 32, 4)
-        self.mflow_conv_g2_b3_joint_varout_dimred = conv1x1(32, 32, bias=False)
+        self.p_ims1d2_outl2_dimred = conv1x1(160, 64, bias=False)
+        self.adapt_stage2_b2_joint_varout_dimred = conv1x1(64, 64, bias=False)
+        self.mflow_conv_g2_pool = self._make_crp(64, 64, 4)
+        self.mflow_conv_g2_b3_joint_varout_dimred = conv1x1(64, 64, bias=False)
 
-        self.p_ims1d2_outl3_dimred = conv1x1(64, 32, bias=False)
-        self.adapt_stage3_b2_joint_varout_dimred = conv1x1(32, 32, bias=False)
-        self.mflow_conv_g3_pool = self._make_crp(32, 32, 4)
-        self.mflow_conv_g3_b3_joint_varout_dimred = conv1x1(32, 32, bias=False)
+        self.p_ims1d2_outl3_dimred = conv1x1(96, 64, bias=False)
+        self.adapt_stage3_b2_joint_varout_dimred = conv1x1(64, 64, bias=False)
+        self.mflow_conv_g3_pool = self._make_crp(64, 64, 4)
+        self.mflow_conv_g3_b3_joint_varout_dimred = conv1x1(64, 64, bias=False)
 
-        self.p_ims1d2_outl4_dimred = conv1x1(32, 32, bias=False)
-        self.adapt_stage4_b2_joint_varout_dimred = conv1x1(32, 32, bias=False)
-        self.mflow_conv_g4_pool = self._make_crp(32, 32, 4)
+        self.p_ims1d2_outl4_dimred = conv1x1(64, 64, bias=False)
+        self.adapt_stage4_b2_joint_varout_dimred = conv1x1(64, 64, bias=False)
+        self.mflow_conv_g4_pool = self._make_crp(64, 64, 4)
 
         self.dropout_clf = nn.Dropout(p=0.5)
         # self.clf_conv = nn.Conv2d(256, num_classes, kernel_size=3, stride=1,
         #                           padding=1, bias=True)
-        self.clf_conv = nn.Conv2d(32, 1, kernel_size=3, stride=1,
+        self.clf_conv = nn.Conv2d(64, 1, kernel_size=3, stride=1,
                                   padding=1, bias=True)
 
         for m in self.modules():
@@ -178,6 +178,15 @@ class MobileNetLWRF(nn.Module):
                 m.weight.data.fill_(1)
                 m.bias.data.zero_()
 
+        if pretrained:
+            print('load the pre-trained model.')
+            resnet = models.resnet101(pretrained)
+            self.conv1 = resnet.conv1
+            self.bn1 = resnet.bn1
+            self.layer1 = resnet.layer1
+            self.layer2 = resnet.layer2
+            self.layer3 = resnet.layer3
+            self.layer4 = resnet.layer4
 
     def _make_crp(self, in_planes, out_planes, stages):
         layers = [CRPBlock(in_planes, out_planes, stages)]

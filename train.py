@@ -43,10 +43,7 @@ elif data_mode is 'GCC':
 
 #------------Prepare Trainer------------
 net = cfg.NET
-if net in net in ['CMTL']:
-    from trainer_CMTL import Trainer
-else:
-    from trainer import Trainer
+from trainer import Trainer
 
 #------------Start Training------------
 pwd = os.path.split(os.path.realpath(__file__))[0]
