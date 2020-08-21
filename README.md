@@ -39,8 +39,8 @@ Due to limited spare time and the number of GPUs, I do not plan to conduct some 
 ## Getting Started
 
 ### Preparation
-- Prerequisites
-  - Python 3.x
+- python 2.7
+- pyTorch 1.0
   - Pytorch 1.0 (some networks only support 0.4): http://pytorch.org .
   - other libs in ```requirements.txt```, run ```pip install -r requirements.txt```.
 
