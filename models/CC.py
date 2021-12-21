@@ -4,7 +4,7 @@ import torch.nn.functional as F
 import pdb
 
 class CrowdCounter(nn.Module):
-    def __init__(self,gpus,model_name):
+    def __init__(self, gpus, model_name):
         super(CrowdCounter, self).__init__()        
         
         if model_name == 'MobileCount':
@@ -30,7 +30,7 @@ class CrowdCounter(nn.Module):
     
     def forward(self, img, gt_map):                               
         density_map = self.CCN(img)                          
-        self.loss_mse= self.build_loss(density_map.squeeze(), gt_map.squeeze())               
+        self.loss_mse = self.build_loss(density_map.squeeze(), gt_map.squeeze())               
         return density_map
     
     def build_loss(self, density_map, gt_data):

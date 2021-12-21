@@ -7,7 +7,7 @@ cfg_data = __C_SHHA
 
 __C_SHHA.STD_SIZE = (544,960)
 __C_SHHA.TRAIN_SIZE = (480,848)
-__C_SHHA.DATA_PATH = './exp/data/GCC'
+__C_SHHA.DATA_PATH = '/workspace/data/GCC/'
 
 __C_SHHA.VAL_MODE = 'rd' # rd: radomn splitting; cc: cross camera; cl: cross location              
 
@@ -16,7 +16,7 @@ __C_SHHA.MEAN_STD = ([0.302234709263, 0.291243076324, 0.269087553024], [0.227743
 __C_SHHA.LABEL_FACTOR = 1
 __C_SHHA.LOG_PARA = 2550.
 
-__C_SHHA.RESUME_MODEL = ''#model path
+__C_SHHA.RESUME_MODEL = '/data/models'#model path
 __C_SHHA.TRAIN_BATCH_SIZE = 24 #imgs
 
 __C_SHHA.VAL_BATCH_SIZE = 1 #
