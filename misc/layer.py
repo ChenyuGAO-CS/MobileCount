@@ -5,7 +5,7 @@ import torch.nn as nn
 class Conv2d(nn.Module):
     def __init__(self, in_channels, out_channels, kernel_size, stride=1, NL='relu', same_padding=False, bn=False, dilation=1):
         super(Conv2d, self).__init__()
-        padding = int((kernel_size - 1) / 2) if same_padding else 0
+        padding = int((kernel_size - 1) // 2) if same_padding else 0
         self.conv = []
         if dilation==1:
             self.conv = nn.Conv2d(in_channels, out_channels, kernel_size, stride, padding=padding, dilation=dilation)

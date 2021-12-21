@@ -1,6 +1,5 @@
 import numpy as np
 import os
-import pdb
 import math
 import time
 import random
@@ -8,10 +7,10 @@ import shutil
 
 import torch
 from torch import nn
+
+
 import torchvision.utils as vutils
 import torchvision.transforms as standard_transforms
-
-from tensorboardX import SummaryWriter
 
 import pdb
 
@@ -40,7 +39,7 @@ def real_init_weights(m):
             for mini_m in m.children():
                 real_init_weights(mini_m)
         else:
-            print m
+            print( m )
 
 def weights_normal_init(*models):
     for model in models:
@@ -58,7 +57,9 @@ def weights_normal_init(*models):
                     m.weight.data.normal_(0.0, dev)
 
 
-def logger(exp_path, exp_name, work_dir, exception):
+def logger(exp_path, exp_name, work_dir, exception, resume=False):
+
+    from tensorboardX import SummaryWriter
     
     if not os.path.exists(exp_path):
         os.mkdir(exp_path)
@@ -69,20 +70,44 @@ def logger(exp_path, exp_name, work_dir, exception):
     cfg_lines = cfg_file.readlines()
     
     with open(log_file, 'a') as f:
-            f.write(''.join(cfg_lines) + '\n\n\n\n')
+        f.write(''.join(cfg_lines) + '\n\n\n\n')
 
-
-    copy_cur_env(work_dir, exp_path+ '/' + exp_name + '/code', exception)
+    if not resume:
+        copy_cur_env(work_dir, exp_path+ '/' + exp_name + '/code', exception)
 
 
     return writer, log_file
 
+
+
+def logger_for_CMTL(exp_path, exp_name, work_dir, exception, resume=False):
+    
+    if not os.path.exists(exp_path):
+        os.mkdir(exp_path)
+
+    if not os.path.exists(exp_path+ '/' + exp_name):
+        os.mkdir(exp_path+ '/' + exp_name)
+    log_file = exp_path + '/' + exp_name + '/' + exp_name + '.txt'
+    
+    cfg_file = open('./config.py',"r")  
+    cfg_lines = cfg_file.readlines()
+    
+    with open(log_file, 'a') as f:
+        f.write(''.join(cfg_lines) + '\n\n\n\n')
+
+    if not resume:
+        copy_cur_env(work_dir, exp_path+ '/' + exp_name + '/code', exception)
+
+
+    return log_file
 
 def logger_txt(log_file,epoch,scores):
 
     mae, mse, loss = scores
 
     snapshot_name = 'all_ep_%d_mae_%.1f_mse_%.1f' % (epoch + 1, mae, mse)
+
+    # pdb.set_trace()
 
     with open(log_file, 'a') as f:
         f.write('='*15 + '+'*15 + '='*15 + '\n\n')
@@ -117,15 +142,15 @@ def vis_results(exp_name, epoch, writer, restore, img, pred_map, gt_map):
 
 def print_summary(exp_name,scores,train_record):
     mae, mse, loss = scores
-    print '='*50
-    print exp_name
-    print '    '+ '-'*20
-    print '    [mae %.2f mse %.2f], [val loss %.4f]' % (mae, mse, loss)         
-    print '    '+ '-'*20
-    print '[best] [model: %s] , [mae %.2f], [mse %.2f]' % (train_record['best_model_name'],\
+    print( '='*50 )
+    print( exp_name )
+    print( '    '+ '-'*20 )
+    print( '    [mae %.2f mse %.2f], [val loss %.4f]' % (mae, mse, loss) )        
+    print( '    '+ '-'*20 )
+    print( '[best] [model: %s] , [mae %.2f], [mse %.2f]' % (train_record['best_model_name'],\
                                                         train_record['best_mae'],\
-                                                        train_record['best_mse'])
-    print '='*50
+                                                        train_record['best_mse']) )
+    print( '='*50)
 
 def print_WE_summary(log_txt,epoch,scores,train_record,c_maes):
     mae, mse, loss = scores
@@ -139,14 +164,15 @@ def print_WE_summary(log_txt,epoch,scores,train_record,c_maes):
 
         f.write('='*15 + '+'*15 + '='*15 + '\n\n')
 
-    print '='*50
-    print '    '+ '-'*20
-    print '    [mae %.2f mse %.2f], [val loss %.4f]' % (mae, mse, loss)
-    print '    '+ '-'*20
-    print '[best] [model: %s] , [mae %.2f], [mse %.2f]' % (train_record['best_model_name'],\
+    print( '='*50 )
+    print( '    '+ '-'*20 )
+    print( '    [mae %.2f mse %.2f], [val loss %.4f]' % (mae, mse, loss) )        
+    print( '    '+ '-'*20 )
+    print( '[best] [model: %s] , [mae %.2f], [mse %.2f]' % (train_record['best_model_name'],\
                                                         train_record['best_mae'],\
-                                                        train_record['best_mse'])
-    print '='*50
+                                                        train_record['best_mse']) )
+    print( '='*50 )
+
 
 def print_GCC_summary(log_txt,epoch, scores,train_record,c_maes,c_mses):
     mae, mse, loss = scores
@@ -171,17 +197,17 @@ def print_GCC_summary(log_txt,epoch, scores,train_record,c_maes,c_mses):
 
         f.write('='*15 + '+'*15 + '='*15 + '\n\n')
 
-    print '='*50
-    print '    '+ '-'*20
-    print '    [mae %.2f mse %.2f], [val loss %.4f]' % (mae, mse, loss)
-    print '    '+ '-'*20
-    print '[best] [model: %s] , [mae %.2f], [mse %.2f]' % (train_record['best_model_name'],\
+    print( '='*50 )
+    print( '    '+ '-'*20 )
+    print( '    [mae %.2f mse %.2f], [val loss %.4f]' % (mae, mse, loss) )
+    print( '    '+ '-'*20 )
+    print( '[best] [model: %s] , [mae %.2f], [mse %.2f]' % (train_record['best_model_name'],\
                                                         train_record['best_mae'],\
-                                                        train_record['best_mse'])
-    print '='*50
+                                                        train_record['best_mse']) )
+    print( '='*50 )   
 
 
-def update_model(net,epoch,exp_path,exp_name,scores,train_record,log_file):
+def update_model(net,optimizer,scheduler,epoch,i_tb,exp_path,exp_name,scores,train_record,log_file=None):
 
     mae, mse, loss = scores
 
@@ -189,7 +215,8 @@ def update_model(net,epoch,exp_path,exp_name,scores,train_record,log_file):
 
     if mae < train_record['best_mae'] or mse < train_record['best_mse']:   
         train_record['best_model_name'] = snapshot_name
-        logger_txt(log_file,epoch,scores)
+        if log_file is not None:
+            logger_txt(log_file,epoch,scores)
         to_saved_weight = net.state_dict()
         torch.save(to_saved_weight, os.path.join(exp_path, exp_name, snapshot_name + '.pth'))
 
@@ -197,6 +224,12 @@ def update_model(net,epoch,exp_path,exp_name,scores,train_record,log_file):
         train_record['best_mae'] = mae
     if mse < train_record['best_mse']:
         train_record['best_mse'] = mse 
+
+    latest_state = {'train_record':train_record, 'net':net.state_dict(), 'optimizer':optimizer.state_dict(),\
+                    'scheduler':scheduler.state_dict(), 'epoch': epoch, 'i_tb':i_tb, 'exp_path':exp_path, \
+                    'exp_name':exp_name}
+
+    torch.save(latest_state,os.path.join(exp_path, exp_name, 'latest_state.pth'))
 
     return train_record
 
@@ -210,6 +243,7 @@ def copy_cur_env(work_dir, dst_dir, exception):
 
         file = os.path.join(work_dir,filename)
         dst_file = os.path.join(dst_dir,filename)
+
 
         if os.path.isdir(file) and exception not in filename:
             shutil.copytree(file, dst_file)
@@ -240,7 +274,7 @@ class AverageMeter(object):
 class AverageCategoryMeter(object):
     """Computes and stores the average and current value"""
 
-    def __init__(self,num_class):
+    def __init__(self,num_class):        
         self.num_class = num_class
         self.reset()
 
