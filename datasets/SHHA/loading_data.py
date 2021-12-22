@@ -28,16 +28,16 @@ def random_crop(img,den,dst_size):
     # print img.shape
     # print den.shape
 
-    x1 = random.randint(0, ts_wd - dst_size[1])/cfg_data.LABEL_FACTOR*cfg_data.LABEL_FACTOR
-    y1 = random.randint(0, ts_hd - dst_size[0])/cfg_data.LABEL_FACTOR*cfg_data.LABEL_FACTOR
+    x1 = random.randint(0, ts_wd - dst_size[1])//cfg_data.LABEL_FACTOR*cfg_data.LABEL_FACTOR
+    y1 = random.randint(0, ts_hd - dst_size[0])//cfg_data.LABEL_FACTOR*cfg_data.LABEL_FACTOR
     x2 = x1 + dst_size[1]
     y2 = y1 + dst_size[0]
 
-    label_x1 = x1/cfg_data.LABEL_FACTOR
-    label_y1 = y1/cfg_data.LABEL_FACTOR
-    label_x2 = x2/cfg_data.LABEL_FACTOR
-    label_y2 = y2/cfg_data.LABEL_FACTOR
-
+    label_x1 = x1//cfg_data.LABEL_FACTOR
+    label_y1 = y1//cfg_data.LABEL_FACTOR
+    label_x2 = x2//cfg_data.LABEL_FACTOR
+    label_y2 = y2//cfg_data.LABEL_FACTOR
+    
     return img[:,y1:y2,x1:x2], den[label_y1:label_y2,label_x1:label_x2]
 
 def share_memory(batch):
@@ -54,7 +54,7 @@ def SHHA_collate(batch):
     # @GJY 
     r"""Puts each data field into a tensor with outer dimension batch size"""
 
-    transposed = zip(*batch) # imgs and dens
+    transposed = list(zip(*batch)) # imgs and dens
     imgs, dens = [transposed[0],transposed[1]]
 
 
@@ -103,7 +103,7 @@ def loading_data():
         standard_transforms.ToPILImage()
     ])
 
-    train_set = SHHA(cfg_data.DATA_PATH+'/train', 'train',main_transform=train_main_transform, img_transform=img_transform, gt_transform=gt_transform)
+    train_set = SHHA(cfg_data.DATA_PATH + '/train_data', 'train',main_transform=train_main_transform, img_transform=img_transform, gt_transform=gt_transform)
     train_loader =None
     if cfg_data.TRAIN_BATCH_SIZE==1:
         train_loader = DataLoader(train_set, batch_size=1, num_workers=8, shuffle=True, drop_last=True)
@@ -112,7 +112,7 @@ def loading_data():
     
     
 
-    val_set = SHHA(cfg_data.DATA_PATH+'/test', 'test', main_transform=None, img_transform=img_transform, gt_transform=gt_transform)
+    val_set = SHHA(cfg_data.DATA_PATH + '/test_data', 'test', main_transform=None, img_transform=img_transform, gt_transform=gt_transform)
     val_loader = DataLoader(val_set, batch_size=cfg_data.VAL_BATCH_SIZE, num_workers=8, shuffle=True, drop_last=False)
 
     return train_loader, val_loader, restore_transform
