@@ -34,7 +34,7 @@ restore = standard_transforms.Compose([
 ])
 pil_to_tensor = standard_transforms.ToTensor()
 
-dataRoot = './exp/data/shanghaitech_part_B/test'
+dataRoot = '/workspace/data/shanghaiTech/part_B_final/test_data'
 # dataRoot = './exp/data/shanghaitech_part_A/test'
 
 # LWRF+Mobv2
@@ -49,11 +49,11 @@ dataRoot = './exp/data/shanghaitech_part_B/test'
 # model_path = './exp/02-23_17-59_SHHB_DeepLabv3_0.0001/all_ep_1_mae_45.9_mse_54.2.pth'
 # DeepLabv3+res101
 # model_path = './exp/03-23_10-46_SHHB_ShufLWRN_0.0001/all_ep_285_mae_8.2_mse_12.8.pth'
-model_path = './exp/03-30_13-38_GCC_MobLWRN_0.0001_rd/all_ep_287_mae_30.2_mse_64.1.pth'
+model_path = './exp/12-22_16-10_SHHB_MobileCount_0.0001/best_state.pth'
 
 def main():
     # file_list = [filename for filename in os.listdir(dataRoot+'/img/') if os.path.isfile(os.path.join(dataRoot+'/img/',filename))]
-    file_list = [filename for root, dirs, filename in os.walk(dataRoot + '/img/')]
+    file_list = [filename for root, dirs, filename in os.walk(dataRoot + '/images/')]
     # pdb.set_trace()
 
     # ht_img = cfg.TRAIN.INPUT_SIZE[0]
@@ -75,7 +75,7 @@ def test(file_list, model_path):
     time_sampe = 0
     for filename in file_list:
         step = step + 1
-        print filename
+        print( filename)
         imgname = dataRoot + '/img/' + filename
         filename_no_ext = filename.split('.')[0]
 
@@ -135,7 +135,7 @@ def test(file_list, model_path):
     mae = maes.avg
     mse = np.sqrt(mses.avg)
 
-    print '\n[MAE: %fms][MSE: %fms]' % (mae, mse)
+    print ('\n[MAE: %fms][MSE: %fms]' % (mae, mse))
 
 
 def get_pts(data):

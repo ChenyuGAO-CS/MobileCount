@@ -213,12 +213,15 @@ def update_model(net,optimizer,scheduler,epoch,i_tb,exp_path,exp_name,scores,tra
 
     snapshot_name = 'all_ep_%d_mae_%.1f_mse_%.1f' % (epoch + 1, mae, mse)
 
-    if mae < train_record['best_mae'] or mse < train_record['best_mse']:   
+    if mae < train_record['best_mae']:
+        best_state = {'train_record':train_record, 'net':net.state_dict(), 'optimizer':optimizer.state_dict(),\
+                'scheduler':scheduler.state_dict(), 'epoch': epoch, 'i_tb':i_tb, 'exp_path':exp_path, \
+                'exp_name':exp_name}
         train_record['best_model_name'] = snapshot_name
         if log_file is not None:
             logger_txt(log_file,epoch,scores)
-        to_saved_weight = net.state_dict()
-        torch.save(to_saved_weight, os.path.join(exp_path, exp_name, snapshot_name + '.pth'))
+        #to_saved_weight = net.state_dict()
+        torch.save(best_state, os.path.join(exp_path, exp_name, 'best_state.pth'))
 
     if mae < train_record['best_mae']:           
         train_record['best_mae'] = mae
