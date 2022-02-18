@@ -228,7 +228,6 @@ def copy_cur_env(work_dir, dst_dir, exception):
     for filename in os.listdir(work_dir):
 
         file = os.path.join(work_dir, filename)
-<<<<<<< HEAD
 
         valid = True
         for exc in exception:
@@ -240,27 +239,10 @@ def copy_cur_env(work_dir, dst_dir, exception):
 
         dst_file = os.path.join(dst_dir, filename)
 
-=======
-
-        valid = True
-        for exc in exception:
-            if exc == filename:
-                valid = False
-                break
-        if not valid:
-            continue
-
-        dst_file = os.path.join(dst_dir, filename)
-
->>>>>>> 69bc8ab3c6a87aa38296e1ded4c3eed55f6a80ad
         if os.path.isdir(file):
             shutil.copytree(file, dst_file)
         elif os.path.isfile(file):
             shutil.copyfile(file, dst_file)
-<<<<<<< HEAD
-
-=======
->>>>>>> 69bc8ab3c6a87aa38296e1ded4c3eed55f6a80ad
 
 
 class AverageMeter(object):
