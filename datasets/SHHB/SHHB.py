@@ -13,8 +13,8 @@ from config import cfg
 
 class SHHB(data.Dataset):
     def __init__(self, data_path, mode, main_transform=None, img_transform=None, gt_transform=None):
-        self.img_path = data_path + '/images'
-        self.gt_path = data_path + '/maps_fixed_kernel'
+        self.img_path = os.path.join(data_path, 'images')
+        self.gt_path = os.path.join(data_path, 'maps_fixed_kernel')
         self.data_files = [filename for filename in os.listdir(self.img_path) \
                    if os.path.isfile(os.path.join(self.img_path,filename)) and os.path.splitext(filename)[1] == '.jpg' ]
         self.num_samples = len(self.data_files) 

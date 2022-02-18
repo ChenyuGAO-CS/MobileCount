@@ -63,9 +63,11 @@ def logger(exp_path, exp_name, work_dir, exception, resume=False):
     
     if not os.path.exists(exp_path):
         os.mkdir(exp_path)
-    writer = SummaryWriter(exp_path+ '/' + exp_name)
-    log_file = exp_path + '/' + exp_name + '/' + exp_name + '.txt'
-    
+    #writer = SummaryWriter(exp_path+ '/' + exp_name)
+    writer = SummaryWriter(os.path.join(exp_path, exp_name))
+    #log_file = exp_path + '/' + exp_name + '/' + exp_name + '.txt'
+    log_file = os.path.join(exp_path,exp_name,exp_name + '.txt')
+
     cfg_file = open('./config.py',"r")  
     cfg_lines = cfg_file.readlines()
     
@@ -73,8 +75,8 @@ def logger(exp_path, exp_name, work_dir, exception, resume=False):
         f.write(''.join(cfg_lines) + '\n\n\n\n')
 
     if not resume:
-        copy_cur_env(work_dir, exp_path+ '/' + exp_name + '/code', exception)
-
+        #copy_cur_env(work_dir, exp_path+ '/' + exp_name + '/code', exception)
+        copy_cur_env(work_dir, os.path.join(exp_path,exp_name,'code'), exception)
 
     return writer, log_file
 
@@ -238,21 +240,27 @@ def update_model(net,optimizer,scheduler,epoch,i_tb,exp_path,exp_name,scores,tra
 
 
 def copy_cur_env(work_dir, dst_dir, exception):
-
     if not os.path.exists(dst_dir):
         os.mkdir(dst_dir)
 
     for filename in os.listdir(work_dir):
 
-        file = os.path.join(work_dir,filename)
-        dst_file = os.path.join(dst_dir,filename)
+        file = os.path.join(work_dir, filename)
 
+        valid = True
+        for exc in exception:
+            if exc == filename:
+                valid = False
+                break
+        if not valid:
+            continue
 
-        if os.path.isdir(file) and exception not in filename:
+        dst_file = os.path.join(dst_dir, filename)
+
+        if os.path.isdir(file):
             shutil.copytree(file, dst_file)
         elif os.path.isfile(file):
-            shutil.copyfile(file,dst_file)
-
+            shutil.copyfile(file, dst_file)
 
 
 
