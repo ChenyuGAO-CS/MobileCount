@@ -36,7 +36,6 @@ __C.LR_DECAY = 0.995 # decay rate
 __C.LR_DECAY_START = -1 # when training epoch is more than it, the learning rate will be begin to decay
 __C.NUM_EPOCH_LR_DECAY = 1 # decay frequency
 __C.MAX_EPOCH = 500
-#__C.MAX_EPOCH = 5
 
 # print 
 __C.PRINT_FREQ = 10
