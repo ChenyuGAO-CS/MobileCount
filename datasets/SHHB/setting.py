@@ -8,6 +8,7 @@ cfg_data = __C_SHHB
 __C_SHHB.STD_SIZE = (768,1024)
 # __C_SHHB.TRAIN_SIZE = (384,512)
 __C_SHHB.TRAIN_SIZE = (576,768)
+
 __C_SHHB.DATA_PATH = '/workspace/data/shanghaiTech/part_B_final'
 #__C_SHHB.DATA_PATH = r"C:\\workspace\\data\\shanghaiTech\\part_B_final\\"
 

@@ -54,8 +54,13 @@ if __C.DATASET == 'UCF50':
 if __C.DATASET == 'GCC':
 	__C.EXP_NAME += '_' + __C.VAL_MODE	
 
+<<<<<<< HEAD
 __C.EXP_PATH = './exp' # the path of logs, checkpoints, and current codes
 #__C.EXP_PATH = r".\\exp\\" # the path of logs, checkpoints, and current codes
+=======
+#__C.EXP_PATH = './exp' # the path of logs, checkpoints, and current codes
+__C.EXP_PATH = r".\\exp\\" # the path of logs, checkpoints, and current codes
+>>>>>>> 69bc8ab3c6a87aa38296e1ded4c3eed55f6a80ad
 
 
 #------------------------------VAL------------------------
