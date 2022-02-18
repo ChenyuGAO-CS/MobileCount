@@ -49,7 +49,7 @@ class Trainer():
             self.exp_path = latest_state['exp_path']
             self.exp_name = latest_state['exp_name']
 
-        self.writer, self.log_txt = logger(self.exp_path, self.exp_name, self.pwd, ['exp', '.git', '.idea'],, resume=cfg.RESUME)
+        self.writer, self.log_txt = logger(self.exp_path, self.exp_name, self.pwd, ['exp', '.git', '.idea'], resume=cfg.RESUME)
 
 
     def forward(self):
