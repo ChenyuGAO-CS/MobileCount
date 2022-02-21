@@ -1,3 +1,6 @@
+# output directory
+exp/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -93,6 +96,9 @@ venv.bak/
 # Spyder project settings
 .spyderproject
 .spyproject
+
+# PyCharm IDE
+.idea
 
 # Rope project settings
 .ropeproject
