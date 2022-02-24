@@ -1,7 +1,7 @@
 import os
 import numpy as np
 import torch
-
+import sys
 from config import cfg
 # from trainer import Trainer
 # from trainer_CMTL import Trainer_CMTL
@@ -14,11 +14,10 @@ if seed is not None:
     torch.cuda.manual_seed(seed)
 
 gpus = cfg.GPU_ID
-if len(gpus)== 1:
-        torch.cuda.set_device(gpus[0])
+if len(gpus) == 1:
+    torch.cuda.set_device(gpus[0])
 
 torch.backends.cudnn.benchmark = True
-
 
 #------------prepare data loader------------
 data_mode = cfg.DATASET
@@ -48,5 +47,5 @@ from trainer import Trainer
 #------------Start Training------------
 pwd = os.path.split(os.path.realpath(__file__))[0]
 if __name__ == '__main__':
-    cc_trainer = Trainer(loading_data,cfg_data,pwd)
+    cc_trainer = Trainer(loading_data, cfg_data, pwd)
     cc_trainer.forward()

@@ -6,21 +6,23 @@ import pdb
 class CrowdCounter(nn.Module):
     def __init__(self, gpus, model_name):
         super(CrowdCounter, self).__init__()        
-        
+        self.GPU_OK = torch.cuda.is_available()
         if model_name == 'MobileCount':
             from models.MobileCount import MobileCount as net
         elif model_name == 'MobileCountx1_25':
             from models.MobileCountx1_25 import MobileCount as net
         elif model_name == 'MobileCountx2':
             from models.MobileCountx2 import MobileCount as net
-
-        self.CCN = net()
-        if len(gpus)>1:
-            self.CCN = torch.nn.DataParallel(self.CCN, device_ids=gpus).cuda()
-        else:
-            self.CCN=self.CCN.cuda()
-        self.loss_mse_fn = nn.MSELoss().cuda()
         
+        self.CCN = net()
+        if self.GPU_OK:
+            if len(gpus)>1:
+                self.CCN = torch.nn.DataParallel(self.CCN, device_ids=gpus).cuda()
+            else:
+                self.CCN = self.CCN.cuda()
+            self.loss_mse_fn = nn.MSELoss().cuda()
+        else:
+            self.loss_mse_fn = nn.MSELoss()
     @property
     def loss(self):
         return self.loss_mse

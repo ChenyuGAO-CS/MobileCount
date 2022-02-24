@@ -22,7 +22,9 @@ class Trainer():
         self.pwd = pwd
 
         self.net_name = cfg.NET
-        self.net = CrowdCounter(cfg.GPU_ID,self.net_name).cuda()
+        self.net = CrowdCounter(cfg.GPU_ID, self.net_name)
+        if torch.cuda.is_available():    
+            self.net.cuda()
         self.optimizer = optim.Adam(self.net.CCN.parameters(), lr=cfg.LR, weight_decay=1e-4)
         # self.optimizer = optim.SGD(self.net.parameters(), cfg.LR, momentum=0.95,weight_decay=5e-4)
         self.scheduler = StepLR(self.optimizer, step_size=cfg.NUM_EPOCH_LR_DECAY, gamma=cfg.LR_DECAY)          
@@ -86,9 +88,13 @@ class Trainer():
         for i, data in enumerate(self.train_loader, 0):
             self.timer['iter time'].tic()
             img, gt_map = data
-            img = Variable(img).cuda()
-            gt_map = Variable(gt_map).cuda()
-
+            img = Variable(img)
+            gt_map = Variable(gt_map)
+            
+            if torch.cuda.is_available():
+                img = img.cuda()
+                gt_map = gt_map.cuda()
+            
             self.optimizer.zero_grad()
             pred_map = self.net(img, gt_map)
             loss = self.net.loss
@@ -116,13 +122,19 @@ class Trainer():
             img, gt_map = data
 
             with torch.no_grad():
-                img = Variable(img).cuda()
-                gt_map = Variable(gt_map).cuda()
-
-                pred_map = self.net.forward(img,gt_map)
-
-                pred_map = pred_map.data.cpu().numpy()
-                gt_map = gt_map.data.cpu().numpy()
+                img = Variable(img)
+                gt_map = Variable(gt_map)
+                
+                if torch.cuda.is_available():
+                    img = img.cuda()
+                    gt_map = gt_map.cuda()
+                pred_map = self.net.forward(img, gt_map)
+                if torch.cuda.is_available():
+                    pred_map = pred_map.data.cpu().numpy()
+                    gt_map = gt_map.data.cpu().numpy()
+                else:
+                    pred_map = pred_map.data.numpy()
+                    gt_map = gt_map.data.numpy()
 
                 for i_img in range(pred_map.shape[0]):
                 
@@ -170,13 +182,21 @@ class Trainer():
                 img, gt_map = data
 
                 with torch.no_grad():
-                    img = Variable(img).cuda()
-                    gt_map = Variable(gt_map).cuda()
+                    img = Variable(img)
+                    gt_map = Variable(gt_map)
 
-                    pred_map = self.net.forward(img,gt_map)
-
-                    pred_map = pred_map.data.cpu().numpy()
-                    gt_map = gt_map.data.cpu().numpy()
+                    if torch.cuda.is_available():
+                        img = img.cuda()
+                        gt_map = gt_map.cuda()
+                        
+                    pred_map = self.net.forward(img, gt_map)
+                    
+                    if torch.cuda.is_available():
+                        pred_map = pred_map.data.cpu().numpy()
+                        gt_map = gt_map.data.cpu().numpy()
+                    else:
+                        pred_map = pred_map.data.numpy()
+                        gt_map = gt_map.data.numpy()
 
                     for i_img in range(pred_map.shape[0]):
                     
@@ -223,14 +243,20 @@ class Trainer():
             img, gt_map, attributes_pt = data
 
             with torch.no_grad():
-                img = Variable(img).cuda()
-                gt_map = Variable(gt_map).cuda()
-
-
-                pred_map = self.net.forward(img,gt_map)
-
-                pred_map = pred_map.data.cpu().numpy()
-                gt_map = gt_map.data.cpu().numpy()
+                img = Variable(img)
+                gt_map = Variable(gt_map)
+                
+                if torch.cuda.is_available():
+                    img = img.cuda()
+                    gt_map = gt_map.cuda()
+                pred_map = self.net.forward(img, gt_map)
+                
+                if torch.cuda.is_available():
+                    pred_map = pred_map.data.cpu().numpy()
+                    gt_map = gt_map.data.cpu().numpy()
+                else:
+                    pred_map = pred_map.data.numpy()
+                    gt_map = gt_map.data.numpy()
 
                 for i_img in range(pred_map.shape[0]):
                 
@@ -242,14 +268,15 @@ class Trainer():
 
                     losses.update(self.net.loss.item())
                     maes.update(s_mae)
-                    mses.update(s_mse)   
-                    attributes_pt = attributes_pt.squeeze() 
-                    c_maes['level'].update(s_mae,attributes_pt[i_img][0])
-                    c_mses['level'].update(s_mse,attributes_pt[i_img][0])
-                    c_maes['time'].update(s_mae,attributes_pt[i_img][1]/3)
-                    c_mses['time'].update(s_mse,attributes_pt[i_img][1]/3)
-                    c_maes['weather'].update(s_mae,attributes_pt[i_img][2])
-                    c_mses['weather'].update(s_mse,attributes_pt[i_img][2])
+                    mses.update(s_mse)
+                    # TODO : Debug
+                    #attributes_pt = np.squeeze(attributes_pt)
+                    #c_maes['level'].update(s_mae,attributes_pt[i_img][0])
+                    #c_mses['level'].update(s_mse,attributes_pt[i_img][0])
+                    #c_maes['time'].update(s_mae,attributes_pt[i_img][1]/3)
+                    #c_mses['time'].update(s_mse,attributes_pt[i_img][1]/3)
+                    #c_maes['weather'].update(s_mae,attributes_pt[i_img][2])
+                    #c_mses['weather'].update(s_mse,attributes_pt[i_img][2])
 
 
                 if vi==0:

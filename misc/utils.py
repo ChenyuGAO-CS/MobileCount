@@ -176,26 +176,26 @@ def print_WE_summary(log_txt,epoch,scores,train_record,c_maes):
 
 def print_GCC_summary(log_txt,epoch, scores,train_record,c_maes,c_mses):
     mae, mse, loss = scores
-    c_mses['level'] = np.sqrt(c_mses['level'].avg)
-    c_mses['time'] = np.sqrt(c_mses['time'].avg)
-    c_mses['weather'] = np.sqrt(c_mses['weather'].avg)
+    #c_mses['level'] = np.sqrt(c_mses['level'].avg)
+    #c_mses['time'] = np.sqrt(c_mses['time'].avg)
+    #c_mses['weather'] = np.sqrt(c_mses['weather'].avg)
     with open(log_txt, 'a') as f:
         f.write('='*15 + '+'*15 + '='*15 + '\n')
         f.write(str(epoch) + '\n\n')
         f.write('  [mae %.4f mse %.4f], [val loss %.4f]\n\n' % (mae, mse, loss))
-        f.write('  [level: mae %.4f mse %.4f]\n' % (np.average(c_maes['level'].avg), np.average(c_mses['level'])))
-        f.write('    list: ' + str(np.transpose(c_maes['level'].avg)) + '\n')
-        f.write('    list: ' + str(np.transpose(c_mses['level'])) + '\n\n')
+        #f.write('  [level: mae %.4f mse %.4f]\n' % (np.average(c_maes['level'].avg), np.average(c_mses['level'])))
+        #f.write('    list: ' + str(np.transpose(c_maes['level'].avg)) + '\n')
+        #f.write('    list: ' + str(np.transpose(c_mses['level'])) + '\n\n')
 
-        f.write('  [time: mae %.4f mse %.4f]\n' % (np.average(c_maes['time'].avg), np.average(c_mses['time'])))
-        f.write('    list: ' + str(np.transpose(c_maes['time'].avg)) + '\n')
-        f.write('    list: ' + str(np.transpose(c_mses['time'])) + '\n\n')
+        #f.write('  [time: mae %.4f mse %.4f]\n' % (np.average(c_maes['time'].avg), np.average(c_mses['time'])))
+        #f.write('    list: ' + str(np.transpose(c_maes['time'].avg)) + '\n')
+        #f.write('    list: ' + str(np.transpose(c_mses['time'])) + '\n\n')
 
-        f.write('  [weather: mae %.4f mse %.4f]\n' % (np.average(c_maes['weather'].avg), np.average(c_mses['weather'])))
-        f.write('    list: ' + str(np.transpose(c_maes['weather'].avg)) + '\n')
-        f.write('    list: ' + str(np.transpose(c_mses['weather']))+ '\n\n')
+        #f.write('  [weather: mae %.4f mse %.4f]\n' % (np.average(c_maes['weather'].avg), np.average(c_mses['weather'])))
+        #f.write('    list: ' + str(np.transpose(c_maes['weather'].avg)) + '\n')
+        #f.write('    list: ' + str(np.transpose(c_mses['weather']))+ '\n\n')
 
-        f.write('='*15 + '+'*15 + '='*15 + '\n\n')
+        #f.write('='*15 + '+'*15 + '='*15 + '\n\n')
 
     print( '='*50 )
     print( '    '+ '-'*20 )
