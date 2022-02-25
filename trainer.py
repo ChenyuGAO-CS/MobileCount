@@ -28,6 +28,8 @@ class Trainer():
         self.scheduler = StepLR(self.optimizer, step_size=cfg.NUM_EPOCH_LR_DECAY, gamma=cfg.LR_DECAY)          
 
         self.train_record = {'best_mae': 1e20, 'best_mse':1e20, 'best_model_name': ''}
+        self.train_record_golden = {'best_mae': 1e20, 'best_mse':1e20, 'best_model_name': ''}
+
         self.timer = {'iter time' : Timer(),'train time' : Timer(),'val time' : Timer()} 
 
         self.epoch = 0
@@ -73,13 +75,15 @@ class Trainer():
                 self.timer['val time'].tic()
                 if self.data_mode in ['SHHA', 'SHHB', 'QNRF', 'UCF50']:
                     self.validate_V1()
-                elif self.data_mode is 'WE':
+                elif self.data_mode == 'WE':
                     self.validate_V2()
-                elif self.data_mode is 'GCC':
+                elif self.data_mode == 'GCC':
                     self.validate_V3()
                 self.timer['val time'].toc(average=False)
                 print( 'val time: {:.2f}s'.format(self.timer['val time'].diff) )
-
+                
+                if cfg.INFER_GOLDEN_DATASET:
+                    self.validate_GD()
 
     def train(self): # training for all datasets
         self.net.train()
@@ -264,8 +268,55 @@ class Trainer():
         self.writer.add_scalar('mae', mae, self.epoch + 1)
         self.writer.add_scalar('mse', mse, self.epoch + 1)
 
+        self.train_record_golden = update_model(self.net,self.optimizer,self.scheduler,self.epoch,self.i_tb,self.exp_path,self.exp_name, \
+            [mae, mse, loss],self.train_record_golden,self.log_txt)
+
+
+        print_GCC_summary(self.log_txt,self.epoch,[mae, mse, loss],self.train_record_golden,c_maes,c_mses)
+
+        
+    def validate_GD(self):# validate_GD Validate for golden dataset
+        from torch.utils.data import DataLoader
+        from datasets.GD.loading_data import loading_data
+
+        self.net.eval()
+        
+        losses = AverageMeter()
+        maes = AverageMeter()
+        mses = AverageMeter()
+        
+        golden_val_loader = loading_data()
+        
+        for vi, data in enumerate(golden_val_loader, 0):
+            img, gt_count = data
+            with torch.no_grad():
+                img = Variable(img).cuda()
+
+                pred_map = self.net.forward(img)
+
+                pred_map = pred_map.data.cpu().numpy()
+
+                for i_img in range(pred_map.shape[0]):
+                
+                    pred_cnt = np.sum(pred_map[i_img])/self.cfg_data.LOG_PARA
+                    #gt_count = np.sum(gt_map[i_img])/self.cfg_data.LOG_PARA
+
+                    
+                    #losses.update(self.net.loss.item())
+                    maes.update(abs(gt_count-pred_cnt))
+                    mses.update((gt_count-pred_cnt)*(gt_count-pred_cnt))
+                #if vi==0:
+                #    vis_results(self.exp_name, self.epoch, self.writer, self.restore_transform, img, pred_map, gt_map)
+            
+        mae = maes.avg
+        mse = np.sqrt(mses.avg)
+        loss = 0
+        #loss = losses.avg
+
+        #self.writer.add_scalar('val_loss_golden', loss, self.epoch + 1)
+        self.writer.add_scalar('mae_golden', mae, self.epoch + 1)
+        self.writer.add_scalar('mse_golden', mse, self.epoch + 1)
+
         self.train_record = update_model(self.net,self.optimizer,self.scheduler,self.epoch,self.i_tb,self.exp_path,self.exp_name, \
             [mae, mse, loss],self.train_record,self.log_txt)
-
-
-        print_GCC_summary(self.log_txt,self.epoch,[mae, mse, loss],self.train_record,c_maes,c_mses)
+        print_summary(self.exp_name,[mae, mse, loss],self.train_record)

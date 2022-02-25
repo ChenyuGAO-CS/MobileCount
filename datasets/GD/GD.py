@@ -1,5 +1,5 @@
 import numpy as np
-import os
+import os, json
 import random
 from scipy import io as sio
 import sys
@@ -11,26 +11,29 @@ import h5py
 
 from config import cfg
 
-class SHHB(data.Dataset):
-    def __init__(self, data_path, mode, main_transform=None, img_transform=None, gt_transform=None):
+class GD(data.Dataset):
+    def __init__(self, data_path, img_transform=None):
+        user_json = os.path.join(data_path,'users' ,'golden.json')
+
+        with open(user_json) as f:
+
+            userdata = json.load(f)
+            image_names = userdata['data']
+
         self.img_path = data_path + '/images'
-        self.gt_path = data_path + '/maps_fixed_kernel'
-        self.data_files = [filename for filename in os.listdir(self.img_path) \
-                   if os.path.isfile(os.path.join(self.img_path,filename)) and os.path.splitext(filename)[1] == '.jpg' ]
+        self.json_path = data_path + '/jsons'
+            
+        self.data_files = image_names
         self.num_samples = len(self.data_files) 
-        self.main_transform = main_transform  
         self.img_transform = img_transform
-        self.gt_transform = gt_transform     
+
     
     def __getitem__(self, index):
         fname = self.data_files[index]
-        img, den = self.read_image_and_gt(fname)      
-        if self.main_transform is not None:
-            img, den = self.main_transform(img, den) 
+        img, den = self.read_image_and_gt(fname)
         if self.img_transform is not None:
             img = self.img_transform(img)         
-        if self.gt_transform is not None:
-            den = self.gt_transform(den)               
+          
         return img, den
 
     def __len__(self):
@@ -38,17 +41,18 @@ class SHHB(data.Dataset):
 
     def read_image_and_gt(self,fname):
         img = Image.open(os.path.join(self.img_path,fname))
-        if img.mode == 'L':
+        if img.mode in ['L', 'RGBA', 'P']:
             img = img.convert('RGB')
+
 
         # den = sio.loadmat(os.path.join(self.gt_path,os.path.splitext(fname)[0] + '.mat'))
         # den = den['map']
         #den = pd.read_csv(os.path.join(self.gt_path,os.path.splitext(fname)[0] + '.csv'), sep=',',header=None).values
-        gt_file = h5py.File(os.path.join(self.gt_path, os.path.splitext(fname)[0] + '.h5'))
-        den = np.asarray(gt_file['density'])
-        den = den.astype(np.float32, copy=False)    
-        den = Image.fromarray(den)  
-        return img, den    
+        with open(os.path.join(self.json_path,fname + '.json')) as f:
+                    js = json.load(f)
+                    count = js['human_num']
+        
+        return img, count    
 
     def get_num_samples(self):
         return self.num_samples       
