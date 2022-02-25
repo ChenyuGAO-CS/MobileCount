@@ -9,7 +9,7 @@ cfg = __C
 
 #------------------------------TRAIN------------------------
 __C.SEED = 3035 # random seed,  for reporduction
-__C.DATASET = 'SHHA' # dataset selection: SHHA, SHHB, UCF50, QNRF, WE
+__C.DATASET = 'SHHB' # dataset selection: SHHA, SHHB, UCF50, QNRF, WE
 
 if __C.DATASET == 'UCF50':# only for UCF50
 	from datasets.UCF50.setting import cfg_data
@@ -24,6 +24,9 @@ __C.NET = 'MobileCount' # net selection: MobileCount, MobileCountx1_25, MobileCo
 
 __C.PRE_GCC = False # use the pretrained model on GCC dataset
 __C.PRE_GCC_MODEL = './exp/04-06_16-19_GCC_CSRNet_0.0001_rd/all_ep_130_mae_34.9_mse_71.9.pth' # path to model
+
+__C.RESUME = False # contine training
+__C.RESUME_PATH = './exp/04-25_09-19_SHHB_VGG_1e-05/latest_state.pth' # 
 
 __C.GPU_ID = [0] # sigle gpu: [0], [1] ...; multi gpus: [0,1]
 
@@ -61,7 +64,8 @@ __C.VAL_FREQ = 10 # Before __C.VAL_DENSE_START epoches, the freq is set as __C.V
 __C.VISIBLE_NUM_IMGS = 1 #  must be 1 for training images with the different sizes
 
 
-
+# Infer on Golden dataset
+__C.INFER_GOLDEN_DATASET = True
 #================================================================================
 #================================================================================
 #================================================================================  

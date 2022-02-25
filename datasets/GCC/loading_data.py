@@ -1,8 +1,8 @@
 import torchvision.transforms as standard_transforms
 from torch.utils.data import DataLoader
 import misc.transforms as own_transforms
-from GCC import GCC
-from setting import cfg_data
+from datasets.GCC import GCC
+from datasets.setting import cfg_data
 import torch
 import random
 
