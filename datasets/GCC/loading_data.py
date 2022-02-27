@@ -31,9 +31,15 @@ def loading_data():
         standard_transforms.ToTensor(),
         standard_transforms.Normalize(*mean_std)
     ])
+    # removed
     gt_transform = standard_transforms.Compose([
         own_transforms.LabelNormalize(log_para)
     ])
+    
+    gt_transform2 = standard_transforms.Compose([
+        standard_transforms.ToTensor()
+    ])
+
     restore_transform = standard_transforms.Compose([
         own_transforms.DeNormalize(*mean_std),
         standard_transforms.ToPILImage()
@@ -44,7 +50,7 @@ def loading_data():
                     'train',
                     main_transform=train_main_transform, 
                     img_transform=img_transform, 
-                    gt_transform=gt_transform)
+                    gt_transform=gt_transform2) # remove gt_transform
     
     train_loader = DataLoader(train_set, 
                               batch_size=cfg_data.TRAIN_BATCH_SIZE, 
@@ -53,10 +59,10 @@ def loading_data():
                               drop_last=True)
 
     val_set = GCC(os.path.join(cfg_data.DATA_PATH, 'GCC', 'txt_list', test_list), 
-                  'test', 
+                  'test',
                   main_transform=None, 
-                  img_transform=img_transform,
-                  gt_transform=gt_transform)
+                  img_transform=img_transform, 
+                  gt_transform=gt_transform2)
     
     val_loader = DataLoader(val_set, 
                             batch_size=cfg_data.VAL_BATCH_SIZE, 

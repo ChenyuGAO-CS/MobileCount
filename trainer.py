@@ -51,7 +51,10 @@ class Trainer():
             self.exp_path = latest_state['exp_path']
             self.exp_name = latest_state['exp_name']
 
-        self.writer, self.log_txt = logger(self.exp_path, self.exp_name, self.pwd, ['exp', '.git', '.idea'], resume=cfg.RESUME)
+        self.writer, self.log_txt = logger(self.exp_path, 
+                                           self.exp_name, 
+                                           self.pwd, ['exp', '.git', '.idea'], 
+                                           resume=cfg.RESUME)
 
 
     def forward(self):
@@ -80,7 +83,7 @@ class Trainer():
                 elif self.data_mode == 'GCC':
                     self.validate_V3()
                 self.timer['val time'].toc(average=False)
-                print( 'val time: {:.2f}s'.format(self.timer['val time'].diff) )
+                print('val time: {:.2f}s'.format(self.timer['val time'].diff))
 
 
     def train(self): # training for all datasets
@@ -239,7 +242,7 @@ class Trainer():
         c_mses = {'level':AverageCategoryMeter(9), 'time':AverageCategoryMeter(8),'weather':AverageCategoryMeter(7)}
 
 
-        for vi, data in enumerate(self.val_loader, 0):
+        for vi, data in enumerate(self.val_loader, start=0):
             img, gt_map, attributes_pt = data
 
             with torch.no_grad():
@@ -260,8 +263,8 @@ class Trainer():
 
                 for i_img in range(pred_map.shape[0]):
                 
-                    pred_cnt = np.sum(pred_map[i_img])/self.cfg_data.LOG_PARA
-                    gt_count = np.sum(gt_map[i_img])/self.cfg_data.LOG_PARA
+                    pred_cnt = np.sum(pred_map[i_img]) #/self.cfg_data.LOG_PARA
+                    gt_count = np.sum(gt_map[i_img]) #/self.cfg_data.LOG_PARA
 
                     s_mae = abs(gt_count-pred_cnt)
                     s_mse = (gt_count-pred_cnt)*(gt_count-pred_cnt)
@@ -279,7 +282,7 @@ class Trainer():
                     #c_mses['weather'].update(s_mse,attributes_pt[i_img][2])
 
 
-                if vi==0:
+                if vi == -1: # set to 0 if u want show image
                     vis_results(self.exp_name, self.epoch, self.writer, self.restore_transform, img, pred_map, gt_map)
             
         loss = losses.avg
