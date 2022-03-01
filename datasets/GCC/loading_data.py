@@ -62,7 +62,7 @@ def loading_data():
                   'test',
                   main_transform=None, 
                   img_transform=img_transform, 
-                  gt_transform=gt_transform2)
+                  gt_transform=gt_transform2)  # remove gt_transform
     
     val_loader = DataLoader(val_set, 
                             batch_size=cfg_data.VAL_BATCH_SIZE, 

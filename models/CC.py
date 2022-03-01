@@ -23,6 +23,22 @@ class CrowdCounter(nn.Module):
             self.loss_mse_fn = nn.MSELoss().cuda()
         else:
             self.loss_mse_fn = nn.MSELoss()
+    
+    
+    
+    def compute_lc_loss(self, output, target, sizes=(1, 2, 4)):
+        criterion_L1 = torch.nn.L1Loss(reduction='sum')
+        lc_loss = None
+        for s in sizes:
+            pool = torch.nn.AdaptiveAvgPool2d(s)
+            est = pool(output)
+            gt = pool(target)
+            if lc_loss:
+                lc_loss += criterion_L1(est, gt) / s**2
+            else:
+                lc_loss = criterion_L1(est, gt) / s**2
+        return lc_loss
+    
     @property
     def loss(self):
         return self.loss_mse
@@ -35,8 +51,11 @@ class CrowdCounter(nn.Module):
         self.loss_mse = self.build_loss(density_map.squeeze(), gt_map.squeeze())               
         return density_map
     
-    def build_loss(self, density_map, gt_data):
-        loss_mse = self.loss_mse_fn(density_map, gt_data)  
+    def build_loss(self, density_map, gt_data, custom=True, lbda=1000, sizes=(1, 2, 4)):
+        loss_mse = self.loss_mse_fn(density_map, gt_data)
+        if custom:
+            lc_loss = self.compute_lc_loss(density_map, gt_data, sizes=sizes)
+            loss_mse = loss_mse + lbda * lc_loss
         return loss_mse
 
     def test_forward(self, img):                               
