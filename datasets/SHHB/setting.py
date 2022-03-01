@@ -17,6 +17,10 @@ __C_SHHB.MEAN_STD = ([0.452016860247, 0.447249650955, 0.431981861591],[0.2324204
 __C_SHHB.LABEL_FACTOR = 1
 __C_SHHB.LOG_PARA = 2550.
 
+# Negative value lead not to take in account those transforms
+__C_SHHB.RANDOM_DOWNOVER_SAMPLING = -1 # New parameter to consecutivly down sample and over sample the image in order to simulate bad image encoding.
+__C_SHHB.RANDOM_DOWN_SAMPLING = -1 # New parameter todown sample  the image
+
 __C_SHHB.RESUME_MODEL = ''#model path
 __C_SHHB.TRAIN_BATCH_SIZE = 6 #imgs
 

@@ -18,7 +18,7 @@ class SHHB(data.Dataset):
         self.data_files = [filename for filename in os.listdir(self.img_path) \
                    if os.path.isfile(os.path.join(self.img_path,filename)) and os.path.splitext(filename)[1] == '.jpg' ]
         self.num_samples = len(self.data_files) 
-        self.main_transform=main_transform  
+        self.main_transform = main_transform  
         self.img_transform = img_transform
         self.gt_transform = gt_transform     
     
@@ -26,7 +26,7 @@ class SHHB(data.Dataset):
         fname = self.data_files[index]
         img, den = self.read_image_and_gt(fname)      
         if self.main_transform is not None:
-            img, den = self.main_transform(img,den) 
+            img, den = self.main_transform(img, den) 
         if self.img_transform is not None:
             img = self.img_transform(img)         
         if self.gt_transform is not None:

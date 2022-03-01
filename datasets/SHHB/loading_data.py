@@ -12,8 +12,10 @@ def loading_data():
     mean_std = cfg_data.MEAN_STD
     log_para = cfg_data.LOG_PARA
     train_main_transform = own_transforms.Compose([
-    	own_transforms.RandomCrop(cfg_data.TRAIN_SIZE),
-    	own_transforms.RandomHorizontallyFlip()
+        own_transforms.RandomDownOverSampling(cfg_data.RANDOM_DOWNOVER_SAMPLING),
+        own_transforms.RandomDownSampling(cfg_data.RANDOM_DOWN_SAMPLING),
+        own_transforms.RandomCrop(cfg_data.TRAIN_SIZE),
+        own_transforms.RandomHorizontallyFlip()
     ])
     img_transform = standard_transforms.Compose([
         standard_transforms.ToTensor(),

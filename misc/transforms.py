@@ -81,7 +81,7 @@ class FreeScale(object):
         self.size = size  # (h, w)
 
     def __call__(self, img, mask):
-        return img.resize((self.size[1], self.size[0]), Image.BILINEAR), mask.resize((self.size[1], self.size[0]), Image.NEAREST)
+        return img.resize((self.size[1], self.size[0]), Image.NEAREST), mask.resize((self.size[1], self.size[0]), Image.NEAREST)
 
 
 class ScaleDown(object):
@@ -113,7 +113,40 @@ class Scale(object):
             ow = int(self.size * w / h)
             return img.resize((ow, oh), Image.BILINEAR), mask.resize((ow, oh), Image.NEAREST)
 
+class RandomDownOverSampling(object):
+    # Downsampling then upsampling the image to the original size. 
+    # Simulate bad encoding, to make the network more resilient
+    def __init__(self, factor):
+        self.factor = factor
 
+    def __call__(self, img, mask):
+        if self.factor < 0 or random.random() > 0.5:
+            return img, mask
+        
+        if img.size != mask.size:
+            print(img.size)
+            print(mask.size)           
+        assert img.size == mask.size
+        w, h = img.size
+        return img.resize((int(w / self.factor) ,int(h / self.factor)), Image.BILINEAR).resize((w, h), Image.NEAREST), mask
+
+class RandomDownSampling(object):
+    # Downsampling then upsampling the image to the original size. 
+    # Simulate bad encoding, to make the network more resilient
+    def __init__(self, factor):
+        self.factor = factor
+    
+    def __call__(self, img, mask):
+        if self.factor < 0 or random.random() > 0.5:
+            return img, mask
+        
+        if img.size != mask.size:
+            print(img.size)
+            print(mask.size)           
+        assert img.size == mask.size
+        w, h = img.size
+        return img.resize((int(w / self.factor) ,int(h / self.factor)), Image.BILINEAR) ,  mask.resize((int(w / self.factor) ,int(h / self.factor)), Image.NEAREST)
+       
 # ===============================label tranforms============================
 
 class DeNormalize(object):
