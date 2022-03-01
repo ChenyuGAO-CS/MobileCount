@@ -55,7 +55,7 @@ class CrowdCounter(nn.Module):
         self.loss_mse = self.build_loss(density_map.squeeze(), gt_map.squeeze())               
         return density_map
     
-    def build_loss(self, density_map, gt_data, custom=True, lbda=100, sizes=(1, 2, 4)):
+    def build_loss(self, density_map, gt_data, custom=True, lbda=1000, sizes=(1, 2, 4)):
         loss_mse = self.loss_mse_fn(density_map, gt_data)
         if custom:
             lc_loss = self.compute_lc_loss(density_map, gt_data, sizes=sizes)

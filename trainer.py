@@ -126,8 +126,8 @@ class Trainer():
             img, gt_map = data
 
             with torch.no_grad():
-                #img = Variable(img)
-                #gt_map = Variable(gt_map)
+                img = Variable(img)
+                gt_map = Variable(gt_map)
                 
                 if torch.cuda.is_available():
                     img = img.cuda()
