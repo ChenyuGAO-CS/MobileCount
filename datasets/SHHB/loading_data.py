@@ -23,10 +23,6 @@ def loading_data():
         own_transforms.LabelNormalize(log_para)
     ])
     
-    gt_transform2 = standard_transforms.Compose([
-        standard_transforms.ToTensor()
-    ])
-    
     restore_transform = standard_transforms.Compose([
         own_transforms.DeNormalize(*mean_std),
         standard_transforms.ToPILImage()
@@ -36,7 +32,7 @@ def loading_data():
                      'train',
                      main_transform=train_main_transform, 
                      img_transform=img_transform, 
-                     gt_transform=gt_transform2) # change for loss
+                     gt_transform=gt_transform) # change for loss
     
     train_loader = DataLoader(train_set, 
                               batch_size=cfg_data.TRAIN_BATCH_SIZE, 
@@ -49,7 +45,7 @@ def loading_data():
                    'test', 
                    main_transform=None, 
                    img_transform=img_transform, 
-                   gt_transform=gt_transform2) # change for loss
+                   gt_transform=gt_transform) # change for loss
     
     val_loader = DataLoader(val_set, 
                             batch_size=cfg_data.VAL_BATCH_SIZE, 

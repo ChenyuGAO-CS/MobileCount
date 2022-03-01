@@ -101,6 +101,7 @@ class Trainer():
             self.optimizer.zero_grad()
             pred_map = self.net(img, gt_map)
             loss = self.net.loss
+            lc_loss = self.net.lc_loss
             loss.backward()
             self.optimizer.step()
 
@@ -108,8 +109,8 @@ class Trainer():
                 self.i_tb += 1
                 self.writer.add_scalar('train_loss', loss.item(), self.i_tb)
                 self.timer['iter time'].toc(average=False)
-                print( '[ep %d][it %d][loss %.4f][lr %.4f][%.2fs]' % \
-                        (self.epoch + 1, i + 1, loss.item(), self.optimizer.param_groups[0]['lr']*10000, self.timer['iter time'].diff) )
+                print( '[ep %d][it %d][loss %.4f][lc_loss %.4f][lr %.4f][%.2fs]' % \
+                        (self.epoch + 1, i + 1, loss.item(), lc_loss.item(), self.optimizer.param_groups[0]['lr']*10000, self.timer['iter time'].diff) )
                 print( '        [cnt: gt: %.1f pred: %.2f]' % (gt_map[0].sum().data/self.cfg_data.LOG_PARA, pred_map[0].sum().data/self.cfg_data.LOG_PARA) )           
 
 
@@ -125,8 +126,8 @@ class Trainer():
             img, gt_map = data
 
             with torch.no_grad():
-                img = Variable(img)
-                gt_map = Variable(gt_map)
+                #img = Variable(img)
+                #gt_map = Variable(gt_map)
                 
                 if torch.cuda.is_available():
                     img = img.cuda()
@@ -148,7 +149,7 @@ class Trainer():
                     losses.update(self.net.loss.item())
                     maes.update(abs(gt_count-pred_cnt))
                     mses.update((gt_count-pred_cnt)*(gt_count-pred_cnt))
-                if vi==0: # -1
+                if vi==-1: # -1
                     vis_results(self.exp_name, self.epoch, self.writer, self.restore_transform, img, pred_map, gt_map)
             
         mae = maes.avg
@@ -263,8 +264,8 @@ class Trainer():
 
                 for i_img in range(pred_map.shape[0]):
                 
-                    pred_cnt = np.sum(pred_map[i_img]) #/self.cfg_data.LOG_PARA
-                    gt_count = np.sum(gt_map[i_img]) #/self.cfg_data.LOG_PARA
+                    pred_cnt = np.sum(pred_map[i_img]) /self.cfg_data.LOG_PARA
+                    gt_count = np.sum(gt_map[i_img]) /self.cfg_data.LOG_PARA
 
                     s_mae = abs(gt_count-pred_cnt)
                     s_mse = (gt_count-pred_cnt)*(gt_count-pred_cnt)
