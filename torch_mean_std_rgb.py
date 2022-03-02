@@ -27,14 +27,14 @@ tests_dictionary = {
                  [0.410824894905, 0.370634973049, 0.359682112932], [0.278580576181, 0.26925137639, 0.27156367898]),
              # "image_size": (576,768),
              "image_size": (1024, 768),
-             "recalculate": True
+             "recalculate": False
              },
     "GOLDEN": {"image_path_list": ["/workspace/cclabeler/images"],
                "cclabeler_filter": ["/workspace/cclabeler/users/golden.json"],  # Spécifique pour data de CCLabeler
                "mean_std": ([0.0, 0.0, 0.0], [0.0, 0.0, 0.0]),
                # "image_size": (576,768),
                "image_size": (1024, 768),
-               "recalculate": True
+               "recalculate": False
                },
     "BACKGROUND": {"image_path_list": ["/workspace/cclabeler/images"],
                    "cclabeler_filter": ["/workspace/cclabeler/users/user4.json"],  # Spécifique pour data de CCLabeler
@@ -48,39 +48,39 @@ tests_dictionary = {
                [0.504379212856, 0.510956227779, 0.505369007587], [0.22513884306, 0.225588873029, 0.22579960525]),
            # image_size": (512,672),
            "image_size": (1024, 768),
-           "recalculate": True
+           "recalculate": False
            },
     "UHK": {"image_path_list": ["/workspace/data/CityUHK-X-BEV/images"],
             "mean_std": ([0.0, 0.0, 0.0], [0.0, 0.0, 0.0]),
             # "image_size": (576,768),
             "image_size": (1024, 768),
-            "recalculate": True
+            "recalculate": False
             },
     "UCF50": {"image_path_list": ["/workspace/data/UCF-QNRF_ECCV18/Train"],
               "mean_std": (
                   [0.403584420681, 0.403584420681, 0.403584420681], [0.268462955952, 0.268462955952, 0.268462955952]),
               # "image_size": (576,768),
               "image_size": (1024, 768),
-              "recalculate": True
+              "recalculate": False
               },
     "QNRF": {"image_path_list": ["/workspace/data/UCF-QNRF_ECCV18/Train"],
              "mean_std": (
                  [0.413525998592, 0.378520160913, 0.371616870165], [0.284849464893, 0.277046442032, 0.281509846449]),
              # "image_size": (576,768),
              "image_size": (1024, 768),
-             "recalculate": True
+             "recalculate": False
              },
     "NWPU": {"image_path_list": ["/workspace/data/nwpu/images"],
              "mean_std": ([0.0, 0.0, 0.0], [0.0, 0.0, 0.0]),
              # "image_size": (576,768),
              "image_size": (1024, 768),
-             "recalculate": True
+             "recalculate": False
              },
     "JHU": {"image_path_list": ["/workspace/data/jhu_crowd_v2.0/train/images"],
             "mean_std": ([0.0, 0.0, 0.0], [0.0, 0.0, 0.0]),
             # "image_size": (576,768),
             "image_size": (1024, 768),
-            "recalculate": True
+            "recalculate": False
             },
     "GCC": {"image_path_list": ["/workspace/data"],
             "gcc_filter": ["/workspace/data/GCC/txt_list/train_list.txt"],
@@ -88,7 +88,7 @@ tests_dictionary = {
                 [0.302234709263, 0.291243076324, 0.269087553024], [0.227743327618, 0.211051672697, 0.184846073389]),
             # "image_size": (480,848),
             "image_size": (1024, 768),
-            "recalculate": True
+            "recalculate": False
             },
     "SHHB+BACKGROUND": {"image_path_list": ["/workspace/data/shanghaiTech/part_B_final/train_data/images",
                                             "/workspace/cclabeler/images"],
@@ -194,17 +194,7 @@ if __name__ == '__main__':
 
             for ix, ip in enumerate(record["image_path_list"]):
 
-                if len(cclabeler_filter) > 0 and cclabeler_filter[ix] is not None:
-
-                    user_json_file = cclabeler_filter[ix]
-                    with open(os.path.join(user_json_file)) as f:
-                        userdata = json.load(f)
-                        image_names = userdata['data']
-                        images_filter = []
-                        for image_name in image_names:
-                            images_filter.append(image_name)
-
-                elif len(gcc_filter) > 0 and gcc_filter[ix] is not None:
+                if len(gcc_filter) > 0 and gcc_filter[ix] is not None:
 
                     with open(gcc_filter[ix]) as f:
                         lines = f.readlines()
@@ -218,12 +208,18 @@ if __name__ == '__main__':
                         image_file_path = os.path.join(ip + file_folder + "/pngs/" + file_name + ".png")
                         if os.path.isfile(image_file_path):
                             image_files.append(image_file_path)
-
                 else:
-
+                    
                     images_filter = None
+                    if len(cclabeler_filter) > 0 and cclabeler_filter[ix] is not None:
+                        user_json_file = cclabeler_filter[ix]
+                        with open(os.path.join(user_json_file)) as f:
+                            userdata = json.load(f)
+                            image_names = userdata['data']
+                            images_filter = []
+                            for image_name in image_names:
+                                images_filter.append(image_name)
 
-                if len(image_files) == 0:
                     for filename in os.listdir(ip):
                         if os.path.isfile(os.path.join(ip, filename)) \
                                 and os.path.splitext(filename)[1] in ['.jpg', '.jpeg', '.png'] \
