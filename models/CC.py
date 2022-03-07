@@ -27,7 +27,7 @@ class CrowdCounter(nn.Module):
     
     
     def compute_lc_loss(self, output, target, sizes=(1, 2, 4)):
-        criterion_L1 = torch.nn.L1Loss(reduction='sum')
+        criterion_L1 = torch.nn.L1Loss(reduction='mean')
         if self.GPU_OK:
             criterion_L1 = criterion_L1.cuda()
         lc_loss = None
@@ -57,12 +57,12 @@ class CrowdCounter(nn.Module):
 
         return density_map
     
-    def build_loss(self, density_map, gt_data, custom=True, lbda=1000, sizes=(1, 2, 4)):
+    def build_loss(self, density_map, gt_data, custom=True, lbda=10, sizes=(2, 4)):
         loss_mse = self.loss_mse_fn(density_map, gt_data)
         if custom:
             lc_loss = self.compute_lc_loss(density_map, gt_data, sizes=sizes)
             self.lc_loss = lc_loss
-            loss_mse = loss_mse + lbda * lc_loss  
+            loss_mse = loss_mse + lbda * lc_loss
         return loss_mse
 
     def test_forward(self, img):                               
