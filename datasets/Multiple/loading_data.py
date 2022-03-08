@@ -4,15 +4,25 @@ import pandas as pd
 import misc.transforms as own_transforms
 import torchvision.transforms as standard_transforms
 from torch.utils.data import DataLoader
-from loader import DynamicDataset
+from loader import DynamicDataset, CollateFN
 from settings import cfg_data
 
 
 def loading_data():
     mean_std = cfg_data.MEAN_STD
     log_para = cfg_data.LOG_PARA
+    cl = CollateFN(cfg_data.TRAIN_SIZE)
+    collate = cl.collate if cfg_data.COLLATE_FN and cfg_data.TRAIN_BATCH_SIZE != 1 else None
     
     # choose differents combinaison of transformations
+    """
+    train_main_transform = own_transforms.Compose([
+        own_transforms.RandomDownOverSampling(cfg_data.RANDOM_DOWNOVER_SAMPLING),
+        own_transforms.RandomDownSampling(cfg_data.RANDOM_DOWN_SAMPLING),
+        own_transforms.RandomCrop(cfg_data.TRAIN_SIZE),
+        own_transforms.RandomHorizontallyFlip()
+    ])
+    """
     train_main_transform = own_transforms.Compose([
         own_transforms.RandomHorizontallyFlip()
     ])
@@ -37,7 +47,8 @@ def loading_data():
     
     train_loader = DataLoader(train_set, 
                               batch_size=cfg_data.TRAIN_BATCH_SIZE, 
-                              num_workers=8, 
+                              num_workers=8,
+                              collate_fn=collate,
                               shuffle=True, 
                               drop_last=True)
     

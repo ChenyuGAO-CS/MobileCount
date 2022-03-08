@@ -9,6 +9,7 @@ from scipy import io as sio
 from torch.utils import data
 from scipy.sparse import load_npz
 import glob 
+import random
 
 
 class DynamicDataset(Dataset):
@@ -129,3 +130,72 @@ class CustomDataset:
     
     def __len__(self):
         return len(self.dataset)
+    
+
+
+class CollateFN:
+    def __init__(self, train_size):
+        self.TRAIN_SIZE = train_size
+    
+    def get_min_size(self, batch):
+        "Find the min shape size in the batch"
+        min_ht, min_wd = self.TRAIN_SIZE
+        for i_sample in batch:
+            _, ht, wd = i_sample.shape
+            if ht < min_ht:
+                min_ht = ht
+            if wd < min_wd:
+                min_wd = wd
+        return min_ht, min_wd
+
+    def random_crop(self, img, den, dst_size):
+        """
+        Get the random crop with the desirated size
+        """
+        _, ts_hd, ts_wd = img.shape
+        x1 = random.randint(0, ts_wd - dst_size[1])
+        y1 = random.randint(0, ts_hd - dst_size[0])
+        x2 = x1 + dst_size[1]
+        y2 = y1 + dst_size[0]
+
+        den = den[y1:y2, x1:x2]
+        img = img[:, y1:y2, x1:x2]
+        return img, den
+
+    def share_memory(self, batch):
+        """ 
+        If we're in a background process, concatenate directly into a
+        shared memory tensor to avoid an extra copy
+        """
+        out = None
+        if False:
+
+            numel = sum([x.numel() for x in batch])
+            storage = batch[0].storage()._new_shared(numel)
+            out = batch[0].new(storage)
+        return out
+
+    def collate(self, batch):
+        """
+        Puts each data field into a tensor with outer dimension batch size
+        """
+        transposed = list(zip(*batch))
+        imgs, dens = [transposed[0], transposed[1]]
+
+        if isinstance(imgs[0], torch.Tensor) and isinstance(dens[0], torch.Tensor):
+            min_ht, min_wd = self.get_min_size(imgs)
+            cropped_imgs = []
+            cropped_dens = []
+            for i_sample in range(len(batch)):
+                _img, _den = self.random_crop(img=imgs[i_sample],
+                                         den=dens[i_sample],
+                                         dst_size=[min_ht, min_wd])
+                cropped_imgs.append(_img)
+                cropped_dens.append(_den)
+
+            cropped_imgs = torch.stack(cropped_imgs, 0, 
+                                       out=self.share_memory(cropped_imgs))
+            cropped_dens = torch.stack(cropped_dens, 0, 
+                                       out=self.share_memory(cropped_dens))
+            return [cropped_imgs, cropped_dens]
+        raise TypeError(f"Batch must contain tensors, found: {type(imgs[0])} and {type(dens[1])}")
