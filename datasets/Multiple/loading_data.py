@@ -4,8 +4,8 @@ import pandas as pd
 import misc.transforms as own_transforms
 import torchvision.transforms as standard_transforms
 from torch.utils.data import DataLoader
-from loader import DynamicDataset, CollateFN
-from settings import cfg_data
+from datasets.Multiple.loader import DynamicDataset, CollateFN
+from datasets.Multiple.settings import cfg_data
 
 
 def loading_data():
