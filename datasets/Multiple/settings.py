@@ -29,7 +29,7 @@ __C_DYN.RANDOM_DOWN_SAMPLING = -1
 __C_DYN.RESUME_MODEL = '/data/models'
 __C_DYN.TRAIN_BATCH_SIZE = 12
 __C_DYN.VAL_BATCH_SIZE = 1
-__C_DYN.PATH_SETTINGS = {'GCC__gt_folder': '/workspace/home/gameiroth/data/GCC/density/maps_adaptive_kernel/',
+__C_DYN.PATH_SETTINGS = {'GCC__gt_folder': '/workspace/home/***/data/GCC/density/maps_adaptive_kernel/',
                          'SHH__gt_name_folder': 'maps_fixed_kernel'}
 
 
