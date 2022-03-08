@@ -9,7 +9,7 @@ cfg = __C
 
 #------------------------------TRAIN------------------------
 __C.SEED = 3035 # random seed,  for reporduction
-__C.DATASET = 'SHHB' # dataset selection: SHHA, SHHB, UCF50, QNRF, WE
+__C.DATASET = 'SHHB' # dataset selection: SHHA, SHHB, UCF50, QNRF, WE, Multiple
 
 if __C.DATASET == 'UCF50':# only for UCF50
 	from datasets.UCF50.setting import cfg_data
