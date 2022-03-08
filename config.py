@@ -68,7 +68,7 @@ __C.VISIBLE_NUM_IMGS = 1 #  must be 1 for training images with the different siz
 
 
 # Infer on Golden dataset
-__C.INFER_GOLDEN_DATASET = True
+__C.INFER_GOLDEN_DATASET = False
 #================================================================================
 #================================================================================
 #================================================================================  

@@ -1,3 +1,4 @@
+import sys
 import numpy as np
 
 import torch
@@ -12,8 +13,9 @@ import pdb
 
 
 class Trainer():
-    def __init__(self, dataloader, cfg_data, pwd):
+    def __init__(self, dataloader, cfg_data, pwd, complete_cfg=None):
 
+        self.complete_cfg = complete_cfg
         self.cfg_data = cfg_data
 
         self.data_mode = cfg.DATASET
@@ -22,15 +24,20 @@ class Trainer():
         self.pwd = pwd
 
         self.net_name = cfg.NET
-        self.net = CrowdCounter(cfg.GPU_ID, self.net_name)
+        self.net = CrowdCounter(cfg.GPU_ID, self.net_name, complete_cfg=complete_cfg)
         if torch.cuda.is_available():    
             self.net.cuda()
-        self.optimizer = optim.Adam(self.net.CCN.parameters(), lr=cfg.LR, weight_decay=1e-4)
+            
+        lr = cfg.LR
+        if isinstance(self.complete_cfg, dict) and 'learning_rate' in self.complete_cfg:
+            lr = self.complete_cfg['learning_rate']
+            print('learning_rate:',lr)
+        self.optimizer = optim.Adam(self.net.CCN.parameters(), lr=lr, weight_decay=1e-4)
         # self.optimizer = optim.SGD(self.net.parameters(), cfg.LR, momentum=0.95,weight_decay=5e-4)
         self.scheduler = StepLR(self.optimizer, step_size=cfg.NUM_EPOCH_LR_DECAY, gamma=cfg.LR_DECAY)          
 
-        self.train_record = {'best_mae': 1e20, 'best_mse':1e20, 'best_model_name': ''}
-        self.train_record_golden = {'best_mae': 1e20, 'best_mse':1e20, 'best_model_name': ''}
+        self.train_record = {'best_mae': 1e20, 'best_mse':1e20, 'best_mgape':1e20, 'best_model_name': ''}
+        self.train_record_golden = {'best_mae': 1e20, 'best_mse':1e20, 'best_mgape':1e20, 'best_model_name': ''}
 
         self.timer = {'iter time' : Timer(),'train time' : Timer(),'val time' : Timer()} 
 
@@ -73,7 +80,7 @@ class Trainer():
             self.timer['train time'].toc(average=False)
 
             print( 'train time: {:.2f}s'.format(self.timer['train time'].diff) )
-            print( '='*20 )
+            print( '='*80 )
 
             # validation
             if epoch%cfg.VAL_FREQ==0 or epoch>cfg.VAL_DENSE_START:
@@ -105,7 +112,10 @@ class Trainer():
             self.optimizer.zero_grad()
             pred_map = self.net(img, gt_map)
             loss = self.net.loss
-            lc_loss = self.net.lc_loss
+            if isinstance(self.net.lc_loss, int):
+                lc_loss = self.net.lc_loss
+            else:
+                lc_loss = self.net.lc_loss.item()
             loss.backward()
             self.optimizer.step()
 
@@ -114,17 +124,18 @@ class Trainer():
                 self.writer.add_scalar('train_loss', loss.item(), self.i_tb)
                 self.timer['iter time'].toc(average=False)
                 print( '[ep %d][it %d][loss %.4f][lc_loss %.4f][lr %.4f][%.2fs]' % \
-                        (self.epoch + 1, i + 1, loss.item(), lc_loss.item(), self.optimizer.param_groups[0]['lr']*10000, self.timer['iter time'].diff) )
+                        (self.epoch + 1, i + 1, loss.item(), lc_loss, self.optimizer.param_groups[0]['lr']*10000, self.timer['iter time'].diff) )
                 print( '        [cnt: gt: %.1f pred: %.2f]' % (gt_map[0].sum().data/self.cfg_data.LOG_PARA, pred_map[0].sum().data/self.cfg_data.LOG_PARA) )           
 
 
-    def validate_V1(self):# validate_V1 for SHHA, SHHB, UCF-QNRF, UCF50
+    def validate_V1(self, metric_grid=(4,4)):# validate_V1 for SHHA, SHHB, UCF-QNRF, UCF50
 
         self.net.eval()
         
         losses = AverageMeter()
         maes = AverageMeter()
         mses = AverageMeter()
+        mgapes = AverageMeter()
 
         for vi, data in enumerate(self.val_loader, 0):
             img, gt_map = data
@@ -132,7 +143,7 @@ class Trainer():
             with torch.no_grad():
                 img = Variable(img)
                 gt_map = Variable(gt_map)
-                
+
                 if torch.cuda.is_available():
                     img = img.cuda()
                     gt_map = gt_map.cuda()
@@ -148,25 +159,35 @@ class Trainer():
                 
                     pred_cnt = np.sum(pred_map[i_img])/self.cfg_data.LOG_PARA
                     gt_count = np.sum(gt_map[i_img])/self.cfg_data.LOG_PARA
-
-                    
+                    #print('pred_cnt:',pred_cnt)
+                    #print('gt_count:',gt_count)
                     losses.update(self.net.loss.item())
                     maes.update(abs(gt_count-pred_cnt))
                     mses.update((gt_count-pred_cnt)*(gt_count-pred_cnt))
+                    gape, gcae = get_grid_metrics(pred_map[i_img].squeeze()/self.cfg_data.LOG_PARA, 
+                                                gt_map[i_img]/self.cfg_data.LOG_PARA, 
+                                                metric_grid, 
+                                                debug=False)
+
+                    mgapes.update(gape)
+                    #sys.exit()
+                    
                 if vi==-1: # -1
                     vis_results(self.exp_name, self.epoch, self.writer, self.restore_transform, img, pred_map, gt_map)
             
         mae = maes.avg
         mse = np.sqrt(mses.avg)
         loss = losses.avg
-
+        mgape = mgapes.avg
+        
         self.writer.add_scalar('val_loss', loss, self.epoch + 1)
         self.writer.add_scalar('mae', mae, self.epoch + 1)
-        self.writer.add_scalar('mse', mse, self.epoch + 1)
-
+        self.writer.add_scalar('rmse', mse, self.epoch + 1)
+        self.writer.add_scalar('mgape', mgape, self.epoch + 1)
+        
         self.train_record = update_model(self.net,self.optimizer,self.scheduler,self.epoch,self.i_tb,self.exp_path,self.exp_name, \
-            [mae, mse, loss],self.train_record,self.log_txt)
-        print_summary(self.exp_name,[mae, mse, loss],self.train_record)
+            [mae, mse, mgape, loss],self.train_record,self.log_txt)
+        print_summary(self.exp_name,[mae, mse, mgape, loss],self.train_record)
 
 
     def validate_V2(self):# validate_V2 for WE
@@ -228,8 +249,8 @@ class Trainer():
         self.writer.add_scalar('mae_s5', maes.avg[4], self.epoch + 1)
 
         self.train_record = update_model(self.net,self.optimizer,self.scheduler,self.epoch,self.i_tb,self.exp_path,self.exp_name, \
-            [mae, 0, loss],self.train_record,self.log_txt)
-        print_WE_summary(self.log_txt,self.epoch,[mae, 0, loss],self.train_record,maes)
+            [mae, 0, 0, loss],self.train_record,self.log_txt)
+        print_WE_summary(self.log_txt,self.epoch,[mae, 0, 0, loss],self.train_record,maes)
 
 
 
@@ -297,13 +318,13 @@ class Trainer():
 
         self.writer.add_scalar('val_loss', loss, self.epoch + 1)
         self.writer.add_scalar('mae', mae, self.epoch + 1)
-        self.writer.add_scalar('mse', mse, self.epoch + 1)
+        self.writer.add_scalar('rmse', mse, self.epoch + 1)
 
         self.train_record_golden = update_model(self.net,self.optimizer,self.scheduler,self.epoch,self.i_tb,self.exp_path,self.exp_name, \
-            [mae, mse, loss],self.train_record_golden,self.log_txt)
+            [mae, mse, 0, loss],self.train_record_golden,self.log_txt)
 
 
-        print_GCC_summary(self.log_txt,self.epoch,[mae, mse, loss],self.train_record_golden,c_maes,c_mses)
+        print_GCC_summary(self.log_txt,self.epoch,[mae, mse, 0, loss],self.train_record_golden,c_maes,c_mses)
 
         
     def validate_GD(self):# validate_GD Validate for golden dataset
@@ -349,5 +370,5 @@ class Trainer():
         self.writer.add_scalar('mse_golden', mse, self.epoch + 1)
 
         self.train_record = update_model(self.net,self.optimizer,self.scheduler,self.epoch,self.i_tb,self.exp_path,self.exp_name, \
-            [mae, mse, loss],self.train_record,self.log_txt)
-        print_summary(self.exp_name,[mae, mse, loss],self.train_record)
+            [mae, mse, 0, loss],self.train_record,self.log_txt)
+        print_summary(self.exp_name,[mae, mse, 0, loss],self.train_record)
