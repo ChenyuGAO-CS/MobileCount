@@ -82,7 +82,7 @@ class DynamicDataset(Dataset):
         return img, den
     
     def parse_dataset(self):
-        for LoadClass, folder_dataset in couple_datasets:
+        for LoadClass, folder_dataset in self.couple_datasets:
             loader = LoadClass(folder_dataset, self.mode, **self.kwargs)
             self.dataset = pd.concat((self.dataset, loader.dataset), axis=0)
             self.read_dict[folder_dataset] = {"gt": loader.read_gt,
