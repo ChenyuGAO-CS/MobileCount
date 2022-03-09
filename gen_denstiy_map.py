@@ -61,7 +61,6 @@ def test(file_list, model_path):
     step = 0
     for filename in file_list:
         step = step + 1
-    	print filename
         imgname = dataRoot + '/img/' + filename
         filename_no_ext = filename.split('.')[0]
 
@@ -77,29 +76,6 @@ def test(file_list, model_path):
 
         # prepare
         wd_1, ht_1 = img.size
-        # pdb.set_trace()
-
-        # if wd_1 < 1024:
-        #     dif = 1024 - wd_1
-        #     img = ImageOps.expand(img, border=(0,0,dif,0), fill=0)
-        #     pad = np.zeros([ht_1,dif])
-        #     den = np.array(den)
-        #     den = np.hstack((den,pad))
-        #
-        # if ht_1 < 768:
-        #     dif = 768 - ht_1
-        #     img = ImageOps.expand(img, border=(0,0,0,dif), fill=0)
-        #     pad = np.zeros([dif,wd_1])
-        #     den = np.array(den)
-        #     den = np.vstack((den,pad))
-
-        # plt.figure("org-img")
-        # plt.imshow(img)
-        # plt.show()
-        # print img.size
-
-
-
         img = img_transform(img)
 
         img = Variable(img[None,:,:,:],volatile=True).cuda()

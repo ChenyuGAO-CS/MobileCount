@@ -9,7 +9,7 @@ cfg = __C
 
 #------------------------------TRAIN------------------------
 __C.SEED = 3035 # random seed,  for reporduction
-__C.DATASET = 'SHHB' # dataset selection: SHHA, SHHB, UCF50, QNRF, WE
+__C.DATASET = 'SHHB' # dataset selection: SHHA, SHHB, UCF50, QNRF, WE, Multiple
 
 if __C.DATASET == 'UCF50':# only for UCF50
 	from datasets.UCF50.setting import cfg_data
@@ -28,8 +28,10 @@ __C.PRE_GCC_MODEL = './exp/04-06_16-19_GCC_CSRNet_0.0001_rd/all_ep_130_mae_34.9_
 __C.RESUME = False # contine training
 __C.RESUME_PATH = './exp/04-25_09-19_SHHB_VGG_1e-05/latest_state.pth' # 
 
-__C.GPU_ID = [0] # sigle gpu: [0], [1] ...; multi gpus: [0,1]
-
+if torch.cuda.is_available():
+    __C.GPU_ID = [0] # sigle gpu: [0], [1] ...; multi gpus: [0,1]
+else:
+    __C.GPU_ID = []
 # learning rate settings
 __C.LR = 1e-4 # learning rate
 __C.LR_DECAY = 0.995 # decay rate
@@ -65,7 +67,16 @@ __C.VISIBLE_NUM_IMGS = 1 #  must be 1 for training images with the different siz
 
 
 # Infer on Golden dataset
-__C.INFER_GOLDEN_DATASET = True
+__C.INFER_GOLDEN_DATASET = False
+
+# L1 loss reduction
+__C.L1_LOSS_REDUCTION = "mean"
+
+# Custom LOSS
+__C.CUSTOM_LOSS = True
+__C.CUSTOM_LOSS_LAMBDA = 10
+__C.CUSTOM_LOSS_SIZES = (2, 4)
+
 #================================================================================
 #================================================================================
 #================================================================================  
