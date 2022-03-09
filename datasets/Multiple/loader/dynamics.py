@@ -14,8 +14,7 @@ import random
 
 class DynamicDataset(Dataset):
     def __init__(self,
-                 folder_datasets,
-                 class_datasets,
+                 couple_datasets,
                  mode,
                  main_transform=None, 
                  img_transform=None,
@@ -23,30 +22,31 @@ class DynamicDataset(Dataset):
                  image_size=None, 
                  **kwargs):
         """
-            - folder_datasets : str or list, path list of root data folder
-            - class_datasets : ClassDataset or list, Class Dataset to use with data folder
-            - img_transform : func, pytorch transform for image
-            - gt_transform : func, pytorch transform for ground truth
-            - main_transform : func, main pytorch transform
-            - image_size : int, tuple or None. Resize the image with the shape
-                           by a tupe, a int for a square or 
-                           None for no action (default None)
+            - couple_datasets : tuple or list of tuple, tuple for dataset class and
+                                the dataset path, example : (CustomGCC, '/data/GCC') or 
+                                [(CustomGCC, '/data/GCC'), (CustomSHH, '/data/SHHB')]
             - mode : str, dataset mode between 'train' and 'test'
-            - **kwargs : keywords arguments with : 
+            - **kwargs : keywords arguments, some datasets required arguments with: 
                 - GCC : 
                     - GCC__gt_folder
                     - GCC__index_folder
                     - GCC__gt_format
                 - SHH :
-                    - SHH__gt_name_folder
-                    - SHH__gt_format
-                
-        Limitation: - must use the same params if call twice a CustomClass
+                    - SHHA__gt_name_folder
+                    - SHHA__gt_format          
+                    - SHHB__gt_name_folder
+                    - SHHB__gt_format
+            
+            Optionnal:
+            - img_transform : func, pytorch transform for image
+            - gt_transform : func, pytorch transform for ground truth
+            - main_transform : func, main pytorch transform
+            - image_size : int, tuple or None. Resize the image with the shape
+                           by a tupe, a int for a square or 
+                           None for no action (default None) 
         """
-        self.folder_datasets = folder_datasets if isinstance(
-            folder_datasets, list) else [folder_datasets]
-        self.class_datasets = class_datasets if isinstance(
-            class_datasets, list) else [class_datasets]
+        self.couple_datasets = couple_datasets if isinstance(
+            couple_datasets, tuple) else [couple_datasets]
         self.img_transform = img_transform
         self.gt_transform = gt_transform
         self.main_transform = main_transform
@@ -82,7 +82,7 @@ class DynamicDataset(Dataset):
         return img, den
     
     def parse_dataset(self):
-        for folder_dataset, LoadClass in zip(self.folder_datasets, self.class_datasets):
+        for LoadClass, folder_dataset in couple_datasets:
             loader = LoadClass(folder_dataset, self.mode, **self.kwargs)
             self.dataset = pd.concat((self.dataset, loader.dataset), axis=0)
             self.read_dict[folder_dataset] = {"gt": loader.read_gt,

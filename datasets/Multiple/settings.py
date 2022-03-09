@@ -9,17 +9,16 @@ cfg_data = __C_DYN
 
 __C_DYN.IMAGE_SIZE = None
 __C_DYN.TRAIN_SIZE = (1000, 800)
-__C_DYN.LIST_DATA_PATH = ['/workspace/data/GCC', 
-                          '/workspace/data/shanghaiTech/part_A_final/', 
-                          '/workspace/data/shanghaiTech/part_B_final/']
-__C_DYN.LIST_CLASSES = [CustomGCC, CustomSHH, CustomSHH]
-__C_DYN.LIST_PATH = '.'
+__C_DYN.LIST_DATA_PATH = [(CustomGCC, '/workspace/data/GCC'), 
+                          (CustomSHH, '/workspace/data/shanghaiTech/part_A_final/'), 
+                          (CustomSHH, '/workspace/data/shanghaiTech/part_B_final/')
+                         ]
 __C_DYN.MEAN_STD = ([1, 1, 1], 
                     [1, 1, 1])
 #__C_DYN.PROB = [0.2, 0.4, 0.4] # proba getting images
 __C_DYN.COLLATE_FN = True
 # better to remove because use in collate but no effect
-__C_DYN.LABEL_FACTOR = 1 
+#__C_DYN.LABEL_FACTOR = 1 
 __C_DYN.LOG_PARA = 2550.
 
 # Negative value lead not to take in account those transforms
