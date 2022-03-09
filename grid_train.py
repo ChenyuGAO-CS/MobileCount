@@ -18,14 +18,14 @@ pwd = os.path.split(os.path.realpath(__file__))[0]
 if __name__ == '__main__':
     
     if not grid_train:
-        grid_train = {"only_one":""}
-    print("grid_train:",grid_train)
+        grid_train = {"fake_key":"fake_value"}
+    print("\ngrid_train:",grid_train)
     
     grid_parameters = [p for p in grid_parameters(grid_train)]
-    print("Nombre d'entrainements :",len(grid_parameters))
+    print("\nNombre d'entrainements :",len(grid_parameters))
     
     for parameters in grid_parameters:
-        print("Parameters :",parameters)
+        print("\nParameters :",parameters)
         
         from config import cfg
         for cfg_key in cfg:
@@ -38,25 +38,19 @@ if __name__ == '__main__':
         #    net_type = 'MC125'
         #elif cfg.NET=='MobileCountx2':
         #    net_type = 'MC2'
-        str_lr = '%.e' % cfg.LR
         #+ '_' + net_type \        
         EXP_NAME = now \
          + '_' + cfg.DATASET \
-         + '_LR' + str_lr
-        if 'l1_loss_reduction' in parameters:
-            if parameters['l1_loss_reduction']=='mean':
-                EXP_NAME += '_Rm'
-            else: #sum
-                EXP_NAME += '_Rs'
-        if 'custom_loss_lambda' in parameters or 'custom_loss_sizes' in parameters:
-            parameters['custom_loss'] = True
-            if 'custom_loss_lambda' in parameters:
-                EXP_NAME += '_L' + str(parameters['custom_loss_lambda'])
-            if 'custom_loss_sizes' in parameters:
-                str_sizes = ','.join([str(i) for i in parameters['custom_loss_sizes']])
-                EXP_NAME += '_S' + str_sizes
+         + '_LR' + '%.e' % cfg.LR
+        if cfg.L1_LOSS_REDUCTION=='mean':
+            EXP_NAME += '_Rm'
+        else: #sum
+            EXP_NAME += '_Rs'
+        if cfg.CUSTOM_LOSS:
+            EXP_NAME += '_L' + str(cfg.CUSTOM_LOSS_LAMBDA)
+            str_sizes = ','.join([str(i) for i in cfg.CUSTOM_LOSS_SIZES])
+            EXP_NAME += '_S' + str_sizes
         else:
-            parameters['custom_loss'] = False
             EXP_NAME += '_CLno'    
         cfg['EXP_NAME'] = EXP_NAME.replace(' ','')
                 
@@ -93,16 +87,19 @@ if __name__ == '__main__':
         elif data_mode == 'GCC':
             from datasets.GCC.loading_data import loading_data
             from datasets.GCC.setting import cfg_data 
+        elif data_mode == 'Multiple':
+            from datasets.Multiple.loading_data import loading_data
+            from datasets.Multiple.settings import cfg_data
             
-        complete_cfg = cfg
-        complete_cfg.update(cfg_data)
-        complete_cfg.update(parameters)
-        print("complete_cfg:",complete_cfg)
+        cfg_complete = cfg
+        cfg_complete.update(cfg_data)
+        cfg_complete.update(parameters)
+        print("\ncfg_complete:",cfg_complete,"\n")
         
         #------------Prepare Trainer------------
         net = cfg.NET
 
         from trainer import Trainer
 
-        cc_trainer = Trainer(loading_data, cfg_data, pwd, complete_cfg=complete_cfg)
+        cc_trainer = Trainer(loading_data, cfg_complete, pwd)
         cc_trainer.forward()

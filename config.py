@@ -9,7 +9,7 @@ cfg = __C
 
 #------------------------------TRAIN------------------------
 __C.SEED = 3035 # random seed,  for reporduction
-__C.DATASET = 'Multiple' # dataset selection: SHHA, SHHB, UCF50, QNRF, WE, Multiple
+__C.DATASET = 'SHHB' # dataset selection: SHHA, SHHB, UCF50, QNRF, WE, Multiple
 
 if __C.DATASET == 'UCF50':# only for UCF50
 	from datasets.UCF50.setting import cfg_data
@@ -56,7 +56,6 @@ if __C.DATASET == 'GCC':
 	__C.EXP_NAME += '_' + __C.VAL_MODE	
 
 __C.EXP_PATH = './exp' # the path of logs, checkpoints, and current codes
-#__C.EXP_PATH = r".\\exp\\" # the path of logs, checkpoints, and current codes
 
 
 #------------------------------VAL------------------------
@@ -69,6 +68,15 @@ __C.VISIBLE_NUM_IMGS = 1 #  must be 1 for training images with the different siz
 
 # Infer on Golden dataset
 __C.INFER_GOLDEN_DATASET = False
+
+# L1 loss reduction
+__C.L1_LOSS_REDUCTION = "mean"
+
+# Custom LOSS
+__C.CUSTOM_LOSS = True
+__C.CUSTOM_LOSS_LAMBDA = 10
+__C.CUSTOM_LOSS_SIZES = (2, 4)
+
 #================================================================================
 #================================================================================
 #================================================================================  

@@ -7,32 +7,28 @@ from torch.autograd import Variable
 from torch.optim.lr_scheduler import StepLR
 
 from models.CC import CrowdCounter
-from config import cfg
+#from config import cfg
 from misc.utils import *
 import pdb
 
 
 class Trainer():
-    def __init__(self, dataloader, cfg_data, pwd, complete_cfg=None):
+    def __init__(self, dataloader, cfg, pwd):
 
-        self.complete_cfg = complete_cfg
-        self.cfg_data = cfg_data
+        self.cfg = cfg
 
         self.data_mode = cfg.DATASET
         self.exp_name = cfg.EXP_NAME
         self.exp_path = cfg.EXP_PATH
+        
         self.pwd = pwd
 
         self.net_name = cfg.NET
-        self.net = CrowdCounter(cfg.GPU_ID, self.net_name, complete_cfg=complete_cfg)
+        self.net = CrowdCounter(cfg.GPU_ID, self.net_name, cfg=cfg)
         if torch.cuda.is_available():    
             self.net.cuda()
             
-        lr = cfg.LR
-        if isinstance(self.complete_cfg, dict) and 'learning_rate' in self.complete_cfg:
-            lr = self.complete_cfg['learning_rate']
-            print('learning_rate:',lr)
-        self.optimizer = optim.Adam(self.net.CCN.parameters(), lr=lr, weight_decay=1e-4)
+        self.optimizer = optim.Adam(self.net.CCN.parameters(), lr=cfg.LR, weight_decay=1e-4)
         # self.optimizer = optim.SGD(self.net.parameters(), cfg.LR, momentum=0.95,weight_decay=5e-4)
         self.scheduler = StepLR(self.optimizer, step_size=cfg.NUM_EPOCH_LR_DECAY, gamma=cfg.LR_DECAY)          
 
@@ -68,10 +64,9 @@ class Trainer():
 
     def forward(self):
 
-        # self.validate_V3()
-        for epoch in range(self.epoch,cfg.MAX_EPOCH):
+        for epoch in range(self.epoch, self.cfg.MAX_EPOCH):
             self.epoch = epoch
-            if epoch > cfg.LR_DECAY_START:
+            if epoch > self.cfg.LR_DECAY_START:
                 self.scheduler.step()
                 
             # training    
@@ -83,7 +78,7 @@ class Trainer():
             print( '='*80 )
 
             # validation
-            if epoch%cfg.VAL_FREQ==0 or epoch>cfg.VAL_DENSE_START:
+            if epoch%self.cfg.VAL_FREQ==0 or epoch>self.cfg.VAL_DENSE_START:
                 self.timer['val time'].tic()
                 if self.data_mode in ['SHHA', 'SHHB', 'QNRF', 'UCF50']:
                     self.validate_V1()
@@ -94,7 +89,7 @@ class Trainer():
                 self.timer['val time'].toc(average=False)
                 print( 'val time: {:.2f}s'.format(self.timer['val time'].diff) )
                 
-                if cfg.INFER_GOLDEN_DATASET:
+                if self.cfg.INFER_GOLDEN_DATASET:
                     self.validate_GD()
 
     def train(self): # training for all datasets
@@ -119,13 +114,13 @@ class Trainer():
             loss.backward()
             self.optimizer.step()
 
-            if (i + 1) % cfg.PRINT_FREQ == 0:
+            if (i + 1) % self.cfg.PRINT_FREQ == 0:            
                 self.i_tb += 1
                 self.writer.add_scalar('train_loss', loss.item(), self.i_tb)
                 self.timer['iter time'].toc(average=False)
                 print( '[ep %d][it %d][loss %.4f][lc_loss %.4f][lr %.4f][%.2fs]' % \
                         (self.epoch + 1, i + 1, loss.item(), lc_loss, self.optimizer.param_groups[0]['lr']*10000, self.timer['iter time'].diff) )
-                print( '        [cnt: gt: %.1f pred: %.2f]' % (gt_map[0].sum().data/self.cfg_data.LOG_PARA, pred_map[0].sum().data/self.cfg_data.LOG_PARA) )           
+                print( '        [cnt: gt: %.1f pred: %.2f]' % (gt_map[0].sum().data/self.cfg.LOG_PARA, pred_map[0].sum().data/self.cfg.LOG_PARA) )           
 
 
     def validate_V1(self, metric_grid=(4,4)):# validate_V1 for SHHA, SHHB, UCF-QNRF, UCF50
@@ -157,20 +152,18 @@ class Trainer():
 
                 for i_img in range(pred_map.shape[0]):
                 
-                    pred_cnt = np.sum(pred_map[i_img])/self.cfg_data.LOG_PARA
-                    gt_count = np.sum(gt_map[i_img])/self.cfg_data.LOG_PARA
-                    #print('pred_cnt:',pred_cnt)
-                    #print('gt_count:',gt_count)
+                    pred_cnt = np.sum(pred_map[i_img])/self.cfg.LOG_PARA
+                    gt_count = np.sum(gt_map[i_img])/self.cfg.LOG_PARA
+
                     losses.update(self.net.loss.item())
                     maes.update(abs(gt_count-pred_cnt))
                     mses.update((gt_count-pred_cnt)*(gt_count-pred_cnt))
-                    gape, gcae = get_grid_metrics(pred_map[i_img].squeeze()/self.cfg_data.LOG_PARA, 
-                                                gt_map[i_img]/self.cfg_data.LOG_PARA, 
+                    
+                    gape, gcae = get_grid_metrics(pred_map[i_img].squeeze()/self.cfg.LOG_PARA, 
+                                                gt_map[i_img]/self.cfg.LOG_PARA, 
                                                 metric_grid, 
                                                 debug=False)
-
                     mgapes.update(gape)
-                    #sys.exit()
                     
                 if vi==-1: # -1
                     vis_results(self.exp_name, self.epoch, self.writer, self.restore_transform, img, pred_map, gt_map)
