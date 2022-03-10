@@ -423,7 +423,7 @@ def get_grid_metrics(prediction_map, ground_truth_map, metric_grid, debug=False)
         print('gt_nb_person:',gt_nb_person)
         
     #grid absolute percentage error
-    gape = matrix_final.sum()/gt_nb_person
+    gape = 100.*matrix_final.sum()/gt_nb_person
     if debug:
         print('gape:',gape)
         
