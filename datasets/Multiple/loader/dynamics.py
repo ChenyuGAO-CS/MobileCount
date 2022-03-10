@@ -105,6 +105,7 @@ class CustomDataset:
     def __init__(self):
         self.mode = None
         self.dataset = None
+        self.transform = None
         
     def read_index(self):
         pass
