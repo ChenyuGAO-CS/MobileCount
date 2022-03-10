@@ -12,7 +12,7 @@ __C_DYN.TRAIN_SIZE = (1000, 800)
 __C_DYN.LIST_DATA_PATH = [(CustomGCC, '/workspace/data/GCC'), 
                           (CustomSHH, '/workspace/data/shanghaiTech/part_A_final/'), 
                           (CustomSHH, '/workspace/data/shanghaiTech/part_B_final/')
-                          (CustomCC,  '/workspace/cclabeler/')]
+                          (CustomCCLabeler,  '/workspace/cclabeler/')]
 __C_DYN.MEAN_STD = ([1, 1, 1], 
                     [1, 1, 1])
 #__C_DYN.PROB = [0.2, 0.4, 0.4] # proba getting images
