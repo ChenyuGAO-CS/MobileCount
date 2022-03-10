@@ -1,5 +1,5 @@
 from easydict import EasyDict as edict
-from datasets.Multiple.loader import CustomGCC, CustomSHH
+from datasets.Multiple.loader import CustomGCC, CustomSHH, CustomCC
 
 
 # init
@@ -12,7 +12,7 @@ __C_DYN.TRAIN_SIZE = (1000, 800)
 __C_DYN.LIST_DATA_PATH = [(CustomGCC, '/workspace/data/GCC'), 
                           (CustomSHH, '/workspace/data/shanghaiTech/part_A_final/'), 
                           (CustomSHH, '/workspace/data/shanghaiTech/part_B_final/')
-                         ]
+                          (CustomCC,  '/workspace/cclabeler/')]
 __C_DYN.MEAN_STD = ([1, 1, 1], 
                     [1, 1, 1])
 #__C_DYN.PROB = [0.2, 0.4, 0.4] # proba getting images
@@ -29,7 +29,8 @@ __C_DYN.RESUME_MODEL = '/data/models'
 __C_DYN.TRAIN_BATCH_SIZE = 3
 __C_DYN.VAL_BATCH_SIZE = 1
 __C_DYN.PATH_SETTINGS = {'GCC__gt_folder': '/workspace/home/gameiroth/data/GCC/density/maps_adaptive_kernel/',
-                         'SHH__gt_name_folder': 'maps_fixed_kernel'}
+                         'SHH__gt_name_folder': 'maps_fixed_kernel',
+                         'BG__index_folder' : '/workspace/cclabeler/users/user4.json'}
 
 
 # other parameters to classes
@@ -40,3 +41,8 @@ __C_DYN.PATH_SETTINGS = {'GCC__gt_folder': '/workspace/home/gameiroth/data/GCC/d
 # SHH :
 #    - SHH__gt_name_folder
 #    - SHH__gt_format
+# CC : 
+#     - BG__gt_format
+#     - BG__index_filepath
+#     - GD__index_filepath
+#     - GD__gt_format

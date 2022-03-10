@@ -9,15 +9,22 @@ from .dynamics import CustomDataset
 
 
 
-class CustomGD(CustomDataset):
+class CustomCCLabeler(CustomDataset):
     def __init__(self, folder, mode, **kwargs):
         super().__init__()
-        self.gt_index_filepath = kwargs.get('GD__index_filepath', None)
-        # like: '/workspace/cclabeler/users/golden.json'
-        self.transform = kwargs.get('GD__transform', None)
-        self.gt_format = kwargs.get('GD__gt_format', '.json')
+        # like: '/workspace/cclabeler/users/golden.json' for Golden
+        # or '/workspace/cclabeler/users/user4.json' or Background
+        if mode == 'train':
+            self.gt_format = kwargs.get('BG__gt_format', '.json')
+            self.gt_index_filepath = kwargs.get('BG__index_filepath', None)
+            self.transform = kwargs.get('BG__transform', None)
+        else:
+            self.gt_index_filepath = kwargs.get('GD__index_filepath', None)
+            self.transform = kwargs.get('GD__transform', None)
+            self.gt_format = kwargs.get('GD__gt_format', '.json')
+            
         if self.gt_index_filepath is None:
-            raise ValueError('Must specify `GD__index_filepath` parameter')
+            raise ValueError('Must specify `<BG or GD>__index_filepath` parameter')
         self.folder = folder
         self.mode = mode
         self.dataset = self.read_index()
