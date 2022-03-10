@@ -1,5 +1,5 @@
 from easydict import EasyDict as edict
-from datasets.Multiple.loader import CustomGCC, CustomSHH, CustomCC
+from datasets.Multiple.loader import CustomGCC, CustomSHH, CustomCCLabeler
 
 
 # init
