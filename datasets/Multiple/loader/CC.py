@@ -9,7 +9,7 @@ from .dynamics import CustomDataset
 
 
 
-class CustomCCLabeler(CustomDataset):
+class CustomCC(CustomDataset):
     def __init__(self, folder, mode, **kwargs):
         super().__init__()
         # like: '/workspace/cclabeler/users/golden.json' for Golden

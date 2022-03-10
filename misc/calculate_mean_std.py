@@ -3,12 +3,18 @@ sys.path.append("../")
 
 import os
 import time
+from tqdm import tqdm
 import torchvision.transforms as standard_transforms
+from torch.utils.data import DataLoader
 
 from datasets.Multiple.loader import DynamicDataset
 from datasets.Multiple.loader import CustomGCC, CustomSHH, CustomCC
 
 beginning_time = time.time()
+
+PATH_SETTINGS = {'GCC__gt_folder': '/workspace/home/gameiroth/data/GCC/density/maps_adaptive_kernel/',
+                 'SHH__gt_name_folder': 'maps_fixed_kernel',
+                 'BG__index_folder' : '/workspace/cclabeler/users/background.json'}
 
 # Test de recalcul des mean std des images de ShangaiTechA et B, change the list below and run the python script
 tests_dictionary = {
@@ -90,10 +96,11 @@ if __name__ == '__main__':
                                      main_transform=None,
                                      img_transform=img_transform,
                                      gt_transform=None,
-                                     image_size=None)
+                                     image_size=None,
+                                     **PATH_SETTINGS)
 
             val_loader = DataLoader(val_set, 
-                                    batch_size=cfg_data.VAL_BATCH_SIZE, 
+                                    batch_size=record['VAL_BATCH_SIZE'], 
                                     num_workers=8, 
                                     shuffle=False, 
                                     drop_last=False)
