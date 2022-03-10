@@ -32,11 +32,13 @@ __C_DYN.PATH_SETTINGS = {'GCC__gt_folder': '/workspace/home/gameiroth/data/GCC/d
                          'SHH__gt_name_folder': 'maps_fixed_kernel'}
 
 
-# other parameters to classes
-# GCC : 
+#- GCC : 
 #    - GCC__gt_folder
 #    - GCC__index_folder
 #    - GCC__gt_format
-# SHH :
-#    - SHH__gt_name_folder
-#    - SHH__gt_format
+#- SHH : 
+#    - SHHA__gt_name_folder 
+#    - SHHA__gt_format          
+#    - SHHB__gt_name_folder
+#    - SHHB__gt_format
+# NOTE: ds gt folder must be in shh train / test folder (variable is the name of folder)

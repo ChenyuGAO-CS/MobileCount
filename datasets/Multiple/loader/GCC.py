@@ -13,6 +13,7 @@ class CustomGCC(CustomDataset):
         self.gt_folder = kwargs.get('GCC__gt_folder')
         self.gt_index_folder = kwargs.get('GCC__index_folder', 'txt_list')
         self.gt_format = kwargs.get('GCC__gt_format', '.npz')
+        self.transform = kwargs.get('GCC__transform', None)
         if self.gt_folder is None:
             raise ValueError('Must specify `GCC__gt_folder` parameter')
         self.folder = folder
@@ -26,12 +27,15 @@ class CustomGCC(CustomDataset):
         json_data = {}
         for n, line in enumerate(lines):
             crowd_level, time, weather, file_folder, filename, gt_count = line.strip().split()
-            json_data[n] = {"path_img": os.path.join(self.folder, 
+            json_data[n] = {
+                            "path_img": os.path.join(self.folder, 
                                                      pathlib.Path(file_folder).stem, 
                                                      'pngs', filename + '.png'),
                            "path_gt": os.path.join(self.gt_folder, filename) + self.gt_format,
                            "gt_count": gt_count,
-                           "folder": self.folder}
+                           "folder": self.folder,
+                           "transform": True if self.transform is not None else False
+                           }
         df = pd.DataFrame.from_dict(json_data, orient='index')
         return df
     
