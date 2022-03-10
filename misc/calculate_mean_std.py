@@ -6,7 +6,7 @@ import time
 import torchvision.transforms as standard_transforms
 
 from datasets.Multiple.loader import DynamicDataset
-from datasets.Multiple.loader import CustomGCC, CustomSHH
+from datasets.Multiple.loader import CustomGCC, CustomSHH, CustomCC
 
 beginning_time = time.time()
 
