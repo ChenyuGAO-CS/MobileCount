@@ -46,6 +46,6 @@ class CustomGD(CustomDataset):
             ds = np.zeros(shape)
             for x, y in points:
                 ds[x, y] += 1
-            return Image.fromarray(ds.astype('uint8'))
+            return Image.fromarray(ds.astype('uint8').T)
         else:
             raise NotImplementedError
