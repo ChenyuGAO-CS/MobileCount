@@ -69,15 +69,20 @@ class DynamicDataset(Dataset):
         img, den = dataset_func['img'](row.path_img), dataset_func['gt'](row.path_gt)
         if self.image_size is not None:
             img, den = self.resize(img), self.resize(den)
+        
         # specific dataset transform in img and den
+        with_main = True
         if row.transform:
+            # skip main if specific transform is used
             img, den = dataset_func['transform'](img, den)
-        img, den = self.transform_img(img, den)
+            with_main = False
+        img, den = self.transform_img(img, den, with_main=with_main)
         return img, den
     
-    def transform_img(self, img, den):
-        if self.main_transform is not None:
-            img, den = self.main_transform(img, den) 
+    def transform_img(self, img, den, with_main=True):
+        if with_main:
+            if self.main_transform is not None:
+                img, den = self.main_transform(img, den) 
         if self.img_transform is not None:
             img = self.img_transform(img)         
         if self.gt_transform is not None:
@@ -89,7 +94,7 @@ class DynamicDataset(Dataset):
             loader = LoadClass(folder_dataset, self.mode, **self.kwargs)
             self.dataset = pd.concat((self.dataset, loader.dataset), axis=0)
             self.read_dict[folder_dataset] = {"gt": loader.read_gt,
-                                              "img": loader.read_image
+                                              "img": loader.read_image,
                                               "transform": loader.transform}
         self.dataset = self.dataset.reset_index(drop=True)
 
