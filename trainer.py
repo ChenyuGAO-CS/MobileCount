@@ -379,10 +379,15 @@ class Trainer():
         #self.writer.add_scalar('val_loss_golden', loss, self.epoch + 1)
         self.writer.add_scalar('mae_golden', mae, self.epoch + 1)
         self.writer.add_scalar('mse_golden', mse, self.epoch + 1)
-    
+        
+        if mae < self.train_record_golden['best_mae']:
+            self.train_record_golden['best_mae'] = mae
+            self.train_record_golden['best_mse'] = mse
+            
+            
 
-        self.train_record_golden = update_model(self.net,self.optimizer,self.scheduler,self.epoch,self.i_tb,self.exp_path,self.exp_name, \
-            [mae, mse, 0, loss],self.train_record_golden,self.log_txt)
+        #self.train_record_golden = update_model(self.net,self.optimizer,self.scheduler,self.epoch,
+        #self.i_tb,self.exp_path,self.exp_name,[mae, mse, 0, loss],self.train_record_golden, None)
         
         self.TABLE_GOLDEN = f"""
 ### Table des métriques Golden
