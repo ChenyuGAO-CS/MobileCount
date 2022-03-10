@@ -45,7 +45,7 @@ class DynamicDataset(Dataset):
                            by a tupe, a int for a square or 
                            None for no action (default None) 
         """
-        self.couple_datasets = couple_datasets if isinstance(
+        self.couple_datasets = couple_datasets if not isinstance(
             couple_datasets, tuple) else [couple_datasets]
         self.img_transform = img_transform
         self.gt_transform = gt_transform
@@ -97,6 +97,7 @@ class CustomDataset:
     def __init__(self):
         self.mode = None
         self.dataset = None
+        self.transform = None
         
     def read_index(self):
         pass

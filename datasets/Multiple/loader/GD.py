@@ -14,6 +14,7 @@ class CustomGD(CustomDataset):
         super().__init__()
         self.gt_index_filepath = kwargs.get('GD__index_filepath', None)
         # like: '/workspace/cclabeler/users/golden.json'
+        self.transform = kwargs.get('GD__transform', None)
         self.gt_format = kwargs.get('GD__gt_format', '.json')
         if self.gt_index_filepath is None:
             raise ValueError('Must specify `GD__index_filepath` parameter')
@@ -35,7 +36,7 @@ class CustomGD(CustomDataset):
         return df
     
     def load_gt(self, filename, is_density_map=False):
-        if not density_map:
+        if not is_density_map:
             with open(filename, 'r') as f:
                 js_gt = json.load(f)
                 property_img = js_gt['properties']
@@ -46,6 +47,8 @@ class CustomGD(CustomDataset):
             ds = np.zeros(shape)
             for x, y in points:
                 ds[x, y] += 1
-            return Image.fromarray(ds.astype('uint8').T)
+            den = ds.astype('uint8').T
+            return den
+            # if we want return PIL: Image.fromarray(den)
         else:
             raise NotImplementedError
