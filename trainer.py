@@ -340,6 +340,7 @@ class Trainer():
         losses = AverageMeter()
         maes = AverageMeter()
         mses = AverageMeter()
+        #mgapes = AverageMeter()
         
         golden_val_loader = loading_data()
         
@@ -368,11 +369,20 @@ class Trainer():
                     #losses.update(self.net.loss.item())
                     maes.update(abs(gt_count-pred_cnt))
                     mses.update((gt_count-pred_cnt)*(gt_count-pred_cnt))
+                    
+                    
+                    #gape, gcae = get_grid_metrics(pred_map[i_img].squeeze()/self.cfg.LOG_PARA, 
+                    #                            gt_map[i_img]/self.cfg.LOG_PARA, 
+                    #                            metric_grid, 
+                    #                            debug=False)
+                    #mgapes.update(gape)
+                    
                 #if vi==0:
                 #    vis_results(self.exp_name, self.epoch, self.writer, self.restore_transform, img, pred_map, gt_map)
             
         mae = maes.avg
         mse = np.sqrt(mses.avg)
+        mgape = 0 # mgapes.avg
         loss = 0
         #loss = losses.avg
 
@@ -383,9 +393,8 @@ class Trainer():
         if mae < self.train_record_golden['best_mae']:
             self.train_record_golden['best_mae'] = mae
             self.train_record_golden['best_mse'] = mse
-            
-            
-
+            self.train_record_golden['best_mgape'] = mgape
+          
         #self.train_record_golden = update_model(self.net,self.optimizer,self.scheduler,self.epoch,
         #self.i_tb,self.exp_path,self.exp_name,[mae, mse, 0, loss],self.train_record_golden, None)
         
@@ -398,4 +407,4 @@ class Trainer():
 
 """
         self.writer.add_text("validation_golden", self.TABLE_GOLDEN, global_step=self.epoch + 1)
-        print_summary(self.exp_name,[mae, mse, 0, loss],self.train_record)
+        print_summary(self.exp_name,[mae, mse, mgape, loss],self.train_record)
