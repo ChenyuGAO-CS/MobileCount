@@ -42,9 +42,8 @@ class CustomSHH(CustomDataset):
                             "path_img": im,
                             "path_gt": os.path.join(gt_folder, filename + self.gt_format),
                             "gt_count": gt_count,
-                            "folder": self.folder,
-                            "transform": True if self.transform is not None else False
-                           }
+                            "folder": self.folder
+                            }
         df = pd.DataFrame.from_dict(json_data, orient='index')
         return df
             

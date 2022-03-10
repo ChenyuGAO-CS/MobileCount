@@ -43,8 +43,7 @@ def loading_data():
         own_transforms.LabelNormalize(log_para)
     ])
 
-    train_set = DynamicDataset(folder_datasets=cfg_data.LIST_DATA_PATH,
-                              class_datasets=cfg_data.LIST_CLASSES,
+    train_set = DynamicDataset(couple_datasets=cfg_data.LIST_C_DATASETS,
                               mode='train',
                               main_transform=train_main_transform,
                               img_transform=img_transform,
@@ -59,8 +58,7 @@ def loading_data():
                               shuffle=True, 
                               drop_last=True)
     
-    val_set = DynamicDataset(folder_datasets=cfg_data.LIST_DATA_PATH,
-                              class_datasets=cfg_data.LIST_CLASSES,
+    val_set = DynamicDataset(couple_datasets=cfg_data.LIST_C_DATASETS,
                               mode='test',
                               main_transform=None,
                               img_transform=img_transform,

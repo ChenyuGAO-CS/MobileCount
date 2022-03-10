@@ -21,6 +21,7 @@ torch.backends.cudnn.benchmark = True
 
 #------------prepare data loader------------
 data_mode = cfg.DATASET
+
 if data_mode == 'SHHA':
     from datasets.SHHA.loading_data import loading_data 
     from datasets.SHHA.setting import cfg_data 
@@ -43,6 +44,7 @@ elif data_mode == 'Multiple':
     from datasets.Multiple.loading_data import loading_data
     from datasets.Multiple.settings import cfg_data 
 
+cfg_data.update(cfg)
 #------------Prepare Trainer------------
 net = cfg.NET
 from trainer import Trainer

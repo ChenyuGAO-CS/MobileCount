@@ -33,9 +33,8 @@ class CustomGCC(CustomDataset):
                                                      'pngs', filename + '.png'),
                            "path_gt": os.path.join(self.gt_folder, filename) + self.gt_format,
                            "gt_count": gt_count,
-                           "folder": self.folder,
-                           "transform": True if self.transform is not None else False
-                           }
+                           "folder": self.folder
+                            }
         df = pd.DataFrame.from_dict(json_data, orient='index')
         return df
     

@@ -45,7 +45,7 @@ class DynamicDataset(Dataset):
                            by a tupe, a int for a square or 
                            None for no action (default None) 
         """
-        self.couple_datasets = couple_datasets if isinstance(
+        self.couple_datasets = couple_datasets if not isinstance(
             couple_datasets, tuple) else [couple_datasets]
         self.img_transform = img_transform
         self.gt_transform = gt_transform
@@ -69,10 +69,9 @@ class DynamicDataset(Dataset):
         img, den = dataset_func['img'](row.path_img), dataset_func['gt'](row.path_gt)
         if self.image_size is not None:
             img, den = self.resize(img), self.resize(den)
-        
         # specific dataset transform in img and den
         with_main = True
-        if row.transform:
+        if dataset_func['transform'] is not None:
             # skip main if specific transform is used
             img, den = dataset_func['transform'](img, den)
             with_main = False
