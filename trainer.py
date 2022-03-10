@@ -7,7 +7,6 @@ from torch.autograd import Variable
 from torch.optim.lr_scheduler import StepLR
 
 from models.CC import CrowdCounter
-#from config import cfg
 from misc.utils import *
 import pdb
 
@@ -60,7 +59,15 @@ class Trainer():
                                            self.exp_name, 
                                            self.pwd, ['exp', '.git', '.idea'], 
                                            resume=cfg.RESUME)
+        
+        self.TABLE_VALID = f"""
+### Table des métriques {}
 
+| **Best MAE** | **Best RMSE** | **Best MGAPE** | **Best Loss** |
+| ---- | ---- | ---- | ---- |
+| {} | {} | {} | {} | 
+
+"""
 
     def forward(self):
 
@@ -181,16 +188,16 @@ class Trainer():
         self.train_record = update_model(self.net,self.optimizer,self.scheduler,self.epoch,self.i_tb,self.exp_path,self.exp_name, \
             [mae, mse, mgape, loss],self.train_record,self.log_txt)
         
-        self.TABLE_VALID = f"""
-### Table des métriques Validation
-
-| **Best MAE** | **Best RMSE** | **Best MGAPE** | **Best Loss** |
-| ---- | ---- | ---- | ---- |
-| {self.train_record['best_mae']} | {self.train_record['best_mse']} | {self.train_record['best_mgape']} | 
-
-"""
-        
-        self.writer.add_text("validation_table", self.TABLE_VALID, global_step=self.epoch + 1)
+#        self.TABLE_VALID = f"""
+#### Table des métriques Validation
+#
+#| **Best MAE** | **Best RMSE** | **Best MGAPE** | **Best Loss** |
+#| ---- | ---- | ---- | ---- |
+#| {self.train_record['best_mae']} | {self.train_record['best_mse']} | {self.train_record['best_mgape']} |  {self.train_record['best_loss']} | 
+#
+#"""
+        table_valid = self.TABLE_VALID.format('Validation', self.train_record['best_mae'], self.train_record['best_mse'], self.train_record['best_mgape'], self.train_record['best_loss'])
+        self.writer.add_text("validation_table", table_valid, global_step=self.epoch + 1)
         print_summary(self.exp_name,[mae, mse, mgape, loss],self.train_record)
 
 
@@ -398,13 +405,14 @@ class Trainer():
         #self.train_record_golden = update_model(self.net,self.optimizer,self.scheduler,self.epoch,
         #self.i_tb,self.exp_path,self.exp_name,[mae, mse, 0, loss],self.train_record_golden, None)
         
-        self.TABLE_GOLDEN = f"""
-### Table des métriques Golden
-
-| **Best MAE** | **Best RMSE** | **Best MGAPE** | **Best Loss** |
-| ---- | ---- | ---- | ---- |
-| {self.train_record_golden['best_mae']} | {self.train_record_golden['best_mse']} | {self.train_record_golden['best_mgape']} | 
-
-"""
-        self.writer.add_text("validation_golden", self.TABLE_GOLDEN, global_step=self.epoch + 1)
+#        self.TABLE_GOLDEN = f"""
+#### Table des métriques Golden
+#
+#| **Best MAE** | **Best RMSE** | **Best MGAPE** | **Best Loss** |
+#| ---- | ---- | ---- | ---- |
+#| {self.train_record_golden['best_mae']} | {self.train_record_golden['best_mse']} | {self.train_record_golden['best_mgape']} | 
+#
+#"""
+        table_golden = self.TABLE_VALID.format('Golden', self.train_record['best_mae'], self.train_record['best_mse'], self.train_record['best_mgape'], self.train_record['best_loss'])
+        self.writer.add_text("validation_golden", table_golden, global_step=self.epoch + 1)
         print_summary(self.exp_name,[mae, mse, mgape, loss],self.train_record)

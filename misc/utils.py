@@ -226,7 +226,8 @@ def update_model(net,optimizer,scheduler,epoch,i_tb,exp_path,exp_name,scores,tra
         train_record['best_model_name'] = snapshot_name
         train_record['best_mae'] = mae
         train_record['best_mse'] = mse 
-        train_record['best_mgape'] = mgape         
+        train_record['best_mgape'] = mgape
+        train_record['best_loss'] = loss   
         if log_file is not None:
             logger_txt(log_file,epoch,scores)
         #to_saved_weight = net.state_dict()
