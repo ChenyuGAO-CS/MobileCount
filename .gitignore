@@ -1,5 +1,6 @@
 # output directory
 exp/
+misc/mean_std.xlsx
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
