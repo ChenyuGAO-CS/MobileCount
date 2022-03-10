@@ -44,6 +44,7 @@ elif data_mode == 'Multiple':
     from datasets.Multiple.settings import cfg_data 
 
 #------------Prepare Trainer------------
+cfg_data.update(cfg)
 net = cfg.NET
 from trainer import Trainer
 
