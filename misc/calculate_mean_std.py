@@ -3,33 +3,32 @@ sys.path.append("../")
 
 import os
 import time
-from tqdm import tqdm
 import torchvision.transforms as standard_transforms
 from torch.utils.data import DataLoader
 
 from datasets.Multiple.loader import DynamicDataset
-from datasets.Multiple.loader import CustomGCC, CustomSHH, CustomCC
+from datasets.Multiple.loader import CustomCCLabeler, CustomGCC, CustomSHH
+from datasets.Multiple.settings import cfg_data
+
+from misc.utils import get_mean_and_std_by_channel, get_mean_and_std_by_channel_2
 
 beginning_time = time.time()
 
-PATH_SETTINGS = {'GCC__gt_folder': '/workspace/home/gameiroth/data/GCC/density/maps_adaptive_kernel/',
-                 'SHH__gt_name_folder': 'maps_fixed_kernel',
-                 'BG__index_folder' : '/workspace/cclabeler/users/background.json'}
-
 # Test de recalcul des mean std des images de ShangaiTechA et B, change the list below and run the python script
 tests_dictionary = {
-    "GCC+SHHA+SHHB": {"LIST_C_DATASETS": [(CustomGCC, '/workspace/data/GCC'), 
-                          (CustomSHH, '/workspace/data/shanghaiTech/part_A_final/'), 
-                          (CustomSHH, '/workspace/data/shanghaiTech/part_B_final/')
-                         ],
+    "SHHA": {"LIST_C_DATASETS": [(CustomSHH, '/workspace/data/shanghaiTech/part_A_final/')],
              "VAL_BATCH_SIZE": 1,                      
              "MEAN_STD_REFERENCE": (
                  [0.452016860247, 0.447249650955, 0.431981861591], [0.23242045939, 0.224925786257, 0.221840232611]),
              "RECALCULATE": True
              },
-    "SHHA+SHHB": {"LIST_C_DATASETS": [(CustomSHH, '/workspace/data/shanghaiTech/part_A_final/'), 
-                                 (CustomSHH, '/workspace/data/shanghaiTech/part_B_final/')
-                         ],
+    "SHHB": {"LIST_C_DATASETS": [(CustomSHH, '/workspace/data/shanghaiTech/part_B_final/')],
+             "VAL_BATCH_SIZE": 1,  
+             "MEAN_STD_REFERENCE": (
+                 [0.410824894905, 0.370634973049, 0.359682112932], [0.278580576181, 0.26925137639, 0.27156367898]),
+             "RECALCULATE": True
+             },
+    "SHHA+SHHB": {"LIST_C_DATASETS": [(CustomSHH, '/workspace/data/shanghaiTech/part_A_final/'), (CustomSHH, '/workspace/data/shanghaiTech/part_B_final/')],
              "VAL_BATCH_SIZE": 1,  
              "MEAN_STD_REFERENCE": (
                  [0.410824894905, 0.370634973049, 0.359682112932], [0.278580576181, 0.26925137639, 0.27156367898]),
@@ -41,42 +40,6 @@ tests_dictionary = {
 img_transform = standard_transforms.Compose([
     standard_transforms.ToTensor()
 ])
-
-
-def get_mean_and_std_by_channel(loader):
-    channels_sum, channels_squared_sum, num_batches = 0, 0, 0
-    for data in tqdm(loader):
-        # Mean over batch, height and width, but not over the channels
-        channels_sum += torch.mean(data, dim=[0, 2, 3])
-        channels_squared_sum += torch.mean(data ** 2, dim=[0, 2, 3])
-        num_batches += 1
-
-    mean = channels_sum / num_batches
-
-    # std = sqrt(E[X^2] - (E[X])^2)
-    std = (channels_squared_sum / num_batches - mean ** 2) ** 0.5
-    return list(mean.numpy()), list(std.numpy())
-
-
-def get_mean_and_std_by_channel2(loader):
-    # Compute the mean and sd in an online fashion
-    # Var[x] = E[X^2] - E^2[X]
-    cnt = 0
-    fst_moment = torch.empty(3)
-    snd_moment = torch.empty(3)
-
-    for images in tqdm(loader):
-        b, c, h, w = images.shape
-        nb_pixels = b * h * w
-        sum_ = torch.sum(images, dim=[0, 2, 3])
-        sum_of_square = torch.sum(images ** 2,
-                                  dim=[0, 2, 3])
-        fst_moment = (cnt * fst_moment + sum_) / (cnt + nb_pixels)
-        snd_moment = (cnt * snd_moment + sum_of_square) / (cnt + nb_pixels)
-        cnt += nb_pixels
-
-    mean, std = fst_moment, torch.sqrt(snd_moment - fst_moment ** 2)
-    return list(mean.numpy()), list(std.numpy())
 
 
 if __name__ == '__main__':
@@ -97,12 +60,12 @@ if __name__ == '__main__':
                                      img_transform=img_transform,
                                      gt_transform=None,
                                      image_size=None,
-                                     **PATH_SETTINGS)
+                                     **cfg_data.PATH_SETTINGS)
 
             val_loader = DataLoader(val_set, 
                                     batch_size=record['VAL_BATCH_SIZE'], 
                                     num_workers=8, 
-                                    shuffle=False, 
+                                    shuffle=True, 
                                     drop_last=False)
 
             print("Nombre d'images pour le dataset : {}".format(len(val_set)))

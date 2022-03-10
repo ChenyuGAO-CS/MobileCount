@@ -4,6 +4,7 @@ import math
 import time
 import random
 import shutil
+from tqdm import tqdm
 
 import torch
 from torch import nn
@@ -435,3 +436,53 @@ def get_grid_metrics(prediction_map, ground_truth_map, metric_grid, debug=False)
     return gape, gcae
 
 
+def get_mean_and_std_by_channel(loader):
+    channels_sum, channels_squared_sum, num_batches = 0, 0, 0
+    print(type(loader))
+    for i, data in enumerate(loader, 0):
+        print(type(data))
+        print(data)
+        img, gt_map = data
+        print(type(img))
+        print(type(gt_map))
+        print(img)
+        print(gt_map)
+        # Mean over batch, height and width, but not over the channels
+        channels_sum += torch.mean(img, dim=[0, 2, 3])
+        channels_squared_sum += torch.mean(img ** 2, dim=[0, 2, 3])
+        num_batches += 1
+
+    mean = channels_sum / num_batches
+
+    # std = sqrt(E[X^2] - (E[X])^2)
+    std = (channels_squared_sum / num_batches - mean ** 2) ** 0.5
+    return list(mean.numpy()), list(std.numpy())
+
+
+def get_mean_and_std_by_channel_2(loader):
+    # Compute the mean and sd in an online fashion
+    # Var[x] = E[X^2] - E^2[X]
+    cnt = 0
+    fst_moment = torch.empty(3)
+    snd_moment = torch.empty(3)
+
+    print(type(loader))
+    for i, data in enumerate(loader, 0):
+        print(type(data))
+        print(data)
+        img, gt_map = data
+        print(type(img))
+        print(type(gt_map))
+        print(img)
+        print(gt_map)
+        b, c, h, w = img.shape
+        nb_pixels = b * h * w
+        sum_ = torch.sum(images, dim=[0, 2, 3])
+        sum_of_square = torch.sum(images ** 2,
+                                  dim=[0, 2, 3])
+        fst_moment = (cnt * fst_moment + sum_) / (cnt + nb_pixels)
+        snd_moment = (cnt * snd_moment + sum_of_square) / (cnt + nb_pixels)
+        cnt += nb_pixels
+
+    mean, std = fst_moment, torch.sqrt(snd_moment - fst_moment ** 2)
+    return list(mean.numpy()), list(std.numpy())

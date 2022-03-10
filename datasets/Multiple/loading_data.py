@@ -74,6 +74,3 @@ def loading_data():
                             drop_last=False)
 
     return train_loader, val_loader, None
-
-
-

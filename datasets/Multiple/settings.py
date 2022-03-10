@@ -1,5 +1,5 @@
 from easydict import EasyDict as edict
-from datasets.Multiple.loader import CustomGCC, CustomSHH, CustomCC
+from datasets.Multiple.loader import CustomGCC, CustomSHH, CustomCCLabeler
 
 
 # init
@@ -9,10 +9,10 @@ cfg_data = __C_DYN
 
 __C_DYN.IMAGE_SIZE = None
 __C_DYN.TRAIN_SIZE = (1000, 800)
-__C_DYN.LIST_C_DATASETS = [(CustomGCC, '/workspace/data/GCC'), 
+__C_DYN.LIST_DATA_PATH = [(CustomGCC, '/workspace/data/GCC'), 
                           (CustomSHH, '/workspace/data/shanghaiTech/part_A_final/'), 
-                          (CustomSHH, '/workspace/data/shanghaiTech/part_B_final/')
-                          (CustomCC,  '/workspace/cclabeler/')]
+                          (CustomSHH, '/workspace/data/shanghaiTech/part_B_final/'),
+                          (CustomCCLabeler,  '/workspace/cclabeler/')]
 __C_DYN.MEAN_STD = ([1, 1, 1], 
                     [1, 1, 1])
 #__C_DYN.PROB = [0.2, 0.4, 0.4] # proba getting images
@@ -30,10 +30,11 @@ __C_DYN.TRAIN_BATCH_SIZE = 3
 __C_DYN.VAL_BATCH_SIZE = 1
 __C_DYN.PATH_SETTINGS = {'GCC__gt_folder': '/workspace/home/gameiroth/data/GCC/density/maps_adaptive_kernel/',
                          'SHH__gt_name_folder': 'maps_fixed_kernel',
-                         'BG__index_folder' : '/workspace/cclabeler/users/user4.json'}
+                         'BG__index_folder' : '/workspace/cclabeler/users/background.json'}
 
 
-#- GCC : 
+# other parameters to classes
+# GCC : 
 #    - GCC__gt_folder
 #    - GCC__index_folder
 #    - GCC__gt_format
@@ -45,4 +46,3 @@ __C_DYN.PATH_SETTINGS = {'GCC__gt_folder': '/workspace/home/gameiroth/data/GCC/d
 #     - BG__index_filepath
 #     - GD__index_filepath
 #     - GD__gt_format
-
