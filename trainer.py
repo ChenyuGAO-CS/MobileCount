@@ -36,7 +36,7 @@ class Trainer():
         self.train_record_golden = {'best_mae': 1e20, 'best_mse':1e20, 'best_mgape':1e20, 'best_model_name': ''}
 
         self.timer = {'iter time' : Timer(),'train time' : Timer(),'val time' : Timer()} 
-
+        
         self.epoch = 0
         self.i_tb = 0
         
@@ -180,6 +180,17 @@ class Trainer():
         
         self.train_record = update_model(self.net,self.optimizer,self.scheduler,self.epoch,self.i_tb,self.exp_path,self.exp_name, \
             [mae, mse, mgape, loss],self.train_record,self.log_txt)
+        
+        self.TABLE_VALID = f"""
+### Table des métriques Validation
+
+| **Best MAE** | **Best RMSE** | **Best MGAPE** | **Best Loss** |
+| ---- | ---- | ---- | ---- |
+| {self.train_record['best_mae']} | {self.train_record['best_mse']} | {self.train_record['best_mgape']} | 
+
+"""
+        
+        self.writer.add_text("validation_table", self.TABLE_VALID, global_step=self.epoch + 1)
         print_summary(self.exp_name,[mae, mse, mgape, loss],self.train_record)
 
 
@@ -334,16 +345,23 @@ class Trainer():
         
         for vi, data in enumerate(golden_val_loader, 0):
             img, gt_count = data
+            
             with torch.no_grad():
-                img = Variable(img).cuda()
+                img = Variable(img)
+                
+                if torch.cuda.is_available():
+                    img = img.cuda()
 
                 pred_map = self.net.forward(img)
-
-                pred_map = pred_map.data.cpu().numpy()
+                
+                if torch.cuda.is_available():
+                    pred_map = pred_map.data.cpu().numpy()
+                else:
+                    pred_map = pred_map.data.numpy()
 
                 for i_img in range(pred_map.shape[0]):
                 
-                    pred_cnt = np.sum(pred_map[i_img])/self.cfg_data.LOG_PARA
+                    pred_cnt = np.sum(pred_map[i_img])/self.cfg.LOG_PARA
                     #gt_count = np.sum(gt_map[i_img])/self.cfg_data.LOG_PARA
 
                     
@@ -361,7 +379,23 @@ class Trainer():
         #self.writer.add_scalar('val_loss_golden', loss, self.epoch + 1)
         self.writer.add_scalar('mae_golden', mae, self.epoch + 1)
         self.writer.add_scalar('mse_golden', mse, self.epoch + 1)
+        
+        if mae < self.train_record_golden['best_mae']:
+            self.train_record_golden['best_mae'] = mae
+            self.train_record_golden['best_mse'] = mse
+            
+            
 
-        self.train_record = update_model(self.net,self.optimizer,self.scheduler,self.epoch,self.i_tb,self.exp_path,self.exp_name, \
-            [mae, mse, 0, loss],self.train_record,self.log_txt)
+        #self.train_record_golden = update_model(self.net,self.optimizer,self.scheduler,self.epoch,
+        #self.i_tb,self.exp_path,self.exp_name,[mae, mse, 0, loss],self.train_record_golden, None)
+        
+        self.TABLE_GOLDEN = f"""
+### Table des métriques Golden
+
+| **Best MAE** | **Best RMSE** | **Best MGAPE** | **Best Loss** |
+| ---- | ---- | ---- | ---- |
+| {self.train_record_golden['best_mae']} | {self.train_record_golden['best_mse']} | {self.train_record_golden['best_mgape']} | 
+
+"""
+        self.writer.add_text("validation_golden", self.TABLE_GOLDEN, global_step=self.epoch + 1)
         print_summary(self.exp_name,[mae, mse, 0, loss],self.train_record)
