@@ -15,6 +15,7 @@ from misc.utils import get_mean_and_std_by_channel, get_mean_and_std_by_channel_
 beginning_time = time.time()
 
 # Test de recalcul des mean std des images de ShangaiTechA et B, change the list below and run the python script
+output_directory = "/workspace/home/jourdanfa/data/"
 tests_dictionary = {
     "SHHA": {"LIST_C_DATASETS": [(CustomSHH, '/workspace/data/shanghaiTech/part_A_final/')],
              "VAL_BATCH_SIZE": 1,                      
@@ -125,7 +126,7 @@ if __name__ == '__main__':
         results_df = results_df[['dataset', 'nb_images', 'calculation_time (s)', 'nb_images/seconde',
                                  'mean/std - recalculate', 'mean/std - reference', 'mean/std - ratio']]
 
-        xlsx_file = os.path.join("mean_std.xlsx")
+        xlsx_file = os.path.join(output_directory, 'mean_std.xlsx')
         writer = pd.ExcelWriter(xlsx_file)
         results_df.to_excel(writer, 'results', index=False)
         writer.save()
