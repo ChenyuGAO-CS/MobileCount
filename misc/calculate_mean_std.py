@@ -4,6 +4,7 @@ sys.path.append("../")
 import os
 import time
 import torchvision.transforms as standard_transforms
+import misc.transforms as own_transforms
 from torch.utils.data import DataLoader
 
 from datasets.Multiple.loader import DynamicDataset
@@ -41,7 +42,9 @@ tests_dictionary = {
 img_transform = standard_transforms.Compose([
     standard_transforms.ToTensor()
 ])
-
+gt_transform = standard_transforms.Compose([
+    own_transforms.LabelNormalize(cfg_data.LOG_PARA)
+])
 
 if __name__ == '__main__':
 
@@ -56,10 +59,10 @@ if __name__ == '__main__':
             print("\nDataset:", dataset_name)
 
             val_set = DynamicDataset(couple_datasets=record['LIST_C_DATASETS'],
-                                     mode='test',
+                                     mode='train',
                                      main_transform=None,
                                      img_transform=img_transform,
-                                     gt_transform=None,
+                                     gt_transform=gt_transform,
                                      image_size=None,
                                      **cfg_data.PATH_SETTINGS)
 
@@ -89,7 +92,7 @@ if __name__ == '__main__':
             print("Temps de calcul : {} seconde(s)".format(calculation_time))
             nb_images_per_second = round(len(dataset) / (end_time - start_time), 3)
             print("Nombre d'images par seconde : ", nb_images_per_second)
-            info3 = "Nombre d'images : {}".format(len(dataset))
+            #info3 = "Nombre d'images : {}".format(len(dataset))
 
             record = {
                 "dataset": dataset_name,
