@@ -39,7 +39,7 @@ class CustomCCLabeler(CustomDataset):
             try:
                 img = Image.open(image_path)
                 json_data[n] = {"path_img": image_path,
-                               "path_gt":  os.path.join(self.folder, 'jsons',  im + ".json"),
+                               "path_gt":  os.path.join(self.folder, 'jsons' + "/" + im + ".json"),
                                "gt_count": None,
                                "folder": self.folder}
             except Exception as e:
