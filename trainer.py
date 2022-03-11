@@ -344,7 +344,7 @@ class Trainer():
         # losses = AverageMeter()
         maes = AverageMeter()
         mses = AverageMeter()
-        mgapes = AverageMeter()
+        #mgapes = AverageMeter()
 
         golden_val_loader = loading_data()
 
@@ -372,12 +372,14 @@ class Trainer():
                     maes.update(abs(gt_count - pred_cnt))
                     mses.update((gt_count - pred_cnt) * (gt_count - pred_cnt))
 
-                    metric_grid = (4, 4)
-                    gape, gcae = get_grid_metrics(pred_map[i_img].squeeze() / self.cfg.LOG_PARA,
-                                                  gt_count[i_img] / self.cfg.LOG_PARA,
-                                                  metric_grid,
-                                                  debug=False)
-                    mgapes.update(gape)
+                    #metric_grid = (4, 4)
+                    #print('pred_map:',pred_map[i_img].squeeze())
+                    #print('gt_count:',gt_count[i_img])
+                    #gape, gcae = get_grid_metrics(pred_map[i_img].squeeze() / self.cfg.LOG_PARA,
+                    #                              gt_count[i_img] / self.cfg.LOG_PARA,
+                    #                              metric_grid,
+                    #                              debug=False)
+                    #mgapes.update(gape)
 
                 # if vi==0:
                 #    vis_results(self.exp_name, self.epoch, self.writer, self.restore_transform, img, pred_map, gt_map)
@@ -386,19 +388,20 @@ class Trainer():
         mse = np.sqrt(mses.avg)
         loss = 0
         # loss = losses.avg
-        mgape = mgapes.avg
+        mgape = 0
+        #mgape = mgapes.avg
 
         # self.writer.add_scalar('val_loss_golden', loss, self.epoch + 1)
         self.writer.add_scalar('mae_golden', mae, self.epoch + 1)
         self.writer.add_scalar('mse_golden', mse, self.epoch + 1)
-        self.writer.add_scalar('mgape_golden', mgape, self.epoch + 1)
+        #self.writer.add_scalar('mgape_golden', mgape, self.epoch + 1)
 
         best_metric = 'best_mae'
         metric = mae
         if best_metric == 'best_mse':
             metric = mse
-        elif best_metric == 'best_mgape':
-            metric = mgape
+        #elif best_metric == 'best_mgape':
+        #    metric = mgape
 
         if metric < self.train_record_golden[best_metric]:
             self.train_record_golden['best_mae'] = mae
@@ -406,9 +409,9 @@ class Trainer():
             self.train_record_golden['best_mgape'] = mgape
             table_valid = self.TABLE_VALID.format('Golden', self.train_record['best_mae'],
                                                   self.train_record['best_mse'], self.train_record['best_mgape'])
-            self.writer.add_text("validation_table", table_valid, global_step=self.epoch + 1)
+            self.writer.add_text("golden_table", table_valid, global_step=self.epoch + 1)
 
         # self.train_record_golden = update_model(self.net,self.optimizer,self.scheduler,self.epoch,
         # self.i_tb,self.exp_path,self.exp_name,[mae, mse, 0, loss],self.train_record_golden, None)
 
-        print_summary(self.exp_name, [mae, mse, mgape, loss], self.train_record_golden)
+        print_summary(self.exp_name+"-Golden", [mae, mse, mgape, loss], self.train_record_golden)
