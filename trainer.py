@@ -185,7 +185,7 @@ class Trainer():
             self.TABLE_VALID = f"""
 ### Table des métriques Validation
 | **Best MAE** | **Best RMSE** | **Best MGAPE** |
-| ---- | ---- | ---- | ---- |
+| ---- | ---- | ---- |
 | {self.train_record['best_mae']} | {self.train_record['best_mse']} | {self.train_record['best_mgape']} | 
 """
             self.writer.add_text("validation_table", self.TABLE_VALID, global_step=self.epoch + 1)
@@ -399,7 +399,6 @@ class Trainer():
         #elif best_metric == 'best_mgape':
         #    metric = mgape
 
-        print('golden metric:',metric)
         if metric < self.train_record_golden[best_metric]:
             self.train_record_golden['best_mae'] = mae.item()
             self.train_record_golden['best_mse'] = mse.item()
@@ -408,7 +407,7 @@ class Trainer():
             self.TABLE_GOLDEN = f"""
 ### Table des métriques Golden
 | **Best MAE** | **Best RMSE** | **Best MGAPE** |
-| ---- | ---- | ---- | ---- |
+| ---- | ---- | ---- |
 | {self.train_record_golden['best_mae']} | {self.train_record_golden['best_mse']} | {self.train_record_golden['best_mgape']} | 
 """
             self.writer.add_text("validation_golden", self.TABLE_GOLDEN, global_step=self.epoch + 1)
