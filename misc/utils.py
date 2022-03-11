@@ -438,16 +438,12 @@ def get_grid_metrics(prediction_map, ground_truth_map, metric_grid, debug=False)
 
 
 def get_mean_and_std_by_channel(loader):
+    
     channels_sum, channels_squared_sum, num_batches = 0, 0, 0
-    print(type(loader))
-    for i, data in enumerate(loader, 0):
-        print(type(data))
-        print(data)
+
+    for i, data in tqdm(enumerate(loader, 0)):
+
         img, gt_map = data
-        print(type(img))
-        print(type(gt_map))
-        print(img)
-        print(gt_map)
         # Mean over batch, height and width, but not over the channels
         channels_sum += torch.mean(img, dim=[0, 2, 3])
         channels_squared_sum += torch.mean(img ** 2, dim=[0, 2, 3])
@@ -467,15 +463,9 @@ def get_mean_and_std_by_channel_2(loader):
     fst_moment = torch.empty(3)
     snd_moment = torch.empty(3)
 
-    print(type(loader))
-    for i, data in enumerate(loader, 0):
-        print(type(data))
-        print(data)
+    for i, data in tqdm(enumerate(loader, 0)):
+        
         img, gt_map = data
-        print(type(img))
-        print(type(gt_map))
-        print(img)
-        print(gt_map)
         b, c, h, w = img.shape
         nb_pixels = b * h * w
         sum_ = torch.sum(images, dim=[0, 2, 3])

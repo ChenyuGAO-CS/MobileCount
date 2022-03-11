@@ -3,6 +3,8 @@ sys.path.append("../")
 
 import os
 import time
+import numpy as np
+import pandas as pd
 import torchvision.transforms as standard_transforms
 import misc.transforms as own_transforms
 from torch.utils.data import DataLoader
@@ -20,21 +22,35 @@ output_directory = "/workspace/home/jourdanfa/data/"
 tests_dictionary = {
     "SHHA": {"LIST_C_DATASETS": [(CustomSHH, '/workspace/data/shanghaiTech/part_A_final/')],
              "VAL_BATCH_SIZE": 1,                      
-             "MEAN_STD_REFERENCE": (
-                 [0.452016860247, 0.447249650955, 0.431981861591], [0.23242045939, 0.224925786257, 0.221840232611]),
+             "MEAN_STD_REFERENCE": ([0.410824894905, 0.370634973049, 0.359682112932], [0.278580576181, 0.26925137639, 0.27156367898]),
              "RECALCULATE": True
              },
     "SHHB": {"LIST_C_DATASETS": [(CustomSHH, '/workspace/data/shanghaiTech/part_B_final/')],
              "VAL_BATCH_SIZE": 1,  
-             "MEAN_STD_REFERENCE": (
-                 [0.410824894905, 0.370634973049, 0.359682112932], [0.278580576181, 0.26925137639, 0.27156367898]),
+             "MEAN_STD_REFERENCE": ([0.452016860247, 0.447249650955, 0.431981861591], [0.23242045939, 0.224925786257, 0.221840232611]),
+             "RECALCULATE": False
+             },
+    "GCC": {"LIST_C_DATASETS": [(CustomGCC, '/workspace/data/GCC')],
+             "VAL_BATCH_SIZE": 1,  
+             "MEAN_STD_REFERENCE": ([0.302234709263, 0.291243076324, 0.269087553024], [0.227743327618, 0.211051672697, 0.184846073389]),
+             "RECALCULATE": False
+             },
+    "GOLDEN": {"LIST_C_DATASETS": [(CustomCCLabeler, '/workspace/cclabeler/')],
+             "PATH_SETTINGS":{'GD__index_filepath':'/workspace/cclabeler/users/golden.json'},
+             "VAL_BATCH_SIZE": 1,  
+             "MEAN_STD_REFERENCE": ([0.302234709263, 0.291243076324, 0.269087553024], [0.227743327618, 0.211051672697, 0.184846073389]),
              "RECALCULATE": True
              },
-    "SHHA+SHHB": {"LIST_C_DATASETS": [(CustomSHH, '/workspace/data/shanghaiTech/part_A_final/'), (CustomSHH, '/workspace/data/shanghaiTech/part_B_final/')],
+    "BACKGROUND": {"LIST_C_DATASETS": [(CustomCCLabeler, '/workspace/cclabeler/')],
+             "PATH_SETTINGS":{'BG__index_filepath':'/workspace/cclabeler/users/background.json'},
              "VAL_BATCH_SIZE": 1,  
-             "MEAN_STD_REFERENCE": (
-                 [0.410824894905, 0.370634973049, 0.359682112932], [0.278580576181, 0.26925137639, 0.27156367898]),
+             "False": ([0.302234709263, 0.291243076324, 0.269087553024], [0.227743327618, 0.211051672697, 0.184846073389]),
              "RECALCULATE": True
+             },
+    "SHHA+SHHB+GCC": {"LIST_C_DATASETS": [(CustomSHH, '/workspace/data/shanghaiTech/part_A_final/'), (CustomSHH, '/workspace/data/shanghaiTech/part_B_final/')],
+             "VAL_BATCH_SIZE": 1,  
+             "MEAN_STD_REFERENCE": ([0.4341471, 0.41423583, 0.40074146], [0.25675747, 0.2502644, 0.24924684]),
+             "RECALCULATE": False
              },
 }
     
@@ -57,14 +73,24 @@ if __name__ == '__main__':
             start_time = time.time()
 
             print("\nDataset:", dataset_name)
+            
+            path_settings = cfg_data.PATH_SETTINGS
+            print('path_settings:',path_settings)
+            if "PATH_SETTINGS" in record:
+                print('yes')
+                for key, value in record['PATH_SETTINGS'].items():
+                    print(key, value)
+                    path_settings[key] = value
+            print('path_settings NEW:',path_settings)
+            
 
             val_set = DynamicDataset(couple_datasets=record['LIST_C_DATASETS'],
                                      mode='train',
                                      main_transform=None,
                                      img_transform=img_transform,
                                      gt_transform=gt_transform,
-                                     image_size=None,
-                                     **cfg_data.PATH_SETTINGS)
+                                     image_size=(1024, 768),
+                                     **path_settings)
 
             val_loader = DataLoader(val_set, 
                                     batch_size=record['VAL_BATCH_SIZE'], 
@@ -72,12 +98,12 @@ if __name__ == '__main__':
                                     shuffle=True, 
                                     drop_last=False)
 
-            print("Nombre d'images pour le dataset : {}".format(len(val_set)))
+            nb_images = len(val_set)
+            print("Nombre d'images : {}".format(nb_images))
 
             mean_std = get_mean_and_std_by_channel(val_loader)
 
-            print("Nombre d'images : {}".format(len(dataset)))
-            nb_images_total += len(dataset)
+            nb_images_total += len(val_set)
 
             print("mean_std (recalcule) : {}".format(mean_std))
             print("mean_std (reference) : {}".format(record["MEAN_STD_REFERENCE"]))
@@ -90,17 +116,17 @@ if __name__ == '__main__':
             end_time = time.time()
             calculation_time = round((end_time - start_time), 3)
             print("Temps de calcul : {} seconde(s)".format(calculation_time))
-            nb_images_per_second = round(len(dataset) / (end_time - start_time), 3)
+            nb_images_per_second = round(nb_images / (end_time - start_time), 3)
             print("Nombre d'images par seconde : ", nb_images_per_second)
             #info3 = "Nombre d'images : {}".format(len(dataset))
 
             record = {
                 "dataset": dataset_name,
-                "nb_images": len(dataset),
+                "nb_images": nb_images,
                 "calculation_time (s)": calculation_time,
                 "nb_images/seconde": nb_images_per_second,
                 "mean/std - recalculate": str((list(mean_std[0]), list(mean_std[1]))),
-                "mean/std - reference": str((list(record["mean_std"][0]), list(record["mean_std"][1]))),
+                "mean/std - reference": str((list(record["MEAN_STD_REFERENCE"][0]), list(record["MEAN_STD_REFERENCE"][1]))),
                 "mean/std - ratio": str((list(ratio_mean_std[0]), list(ratio_mean_std[1])))
             }
             records.append(record)
