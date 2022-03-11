@@ -54,14 +54,6 @@ class Trainer():
                                            self.exp_name,
                                            self.pwd, ['exp', '.git', '.idea'],
                                            resume=cfg.RESUME)
-        self.TABLE_VALID = """
-    ### Table des métriques {}
-
-    | **Best MAE** | **Best RMSE** | **Best MGAPE** |
-    | ---- | ---- | ---- |
-    | {} | {} | {} |
-
-    """
 
     def forward(self):
 
@@ -190,9 +182,15 @@ class Trainer():
             metric = mgape
 
         if metric < self.train_record[best_metric]:
-            table_valid = self.TABLE_VALID.format('Validation', self.train_record['best_mae'],
-                                                  self.train_record['best_mse'], self.train_record['best_mgape'])
-            self.writer.add_text("validation_table", table_valid, global_step=self.epoch + 1)
+            TABLE_VALID = f"""
+    ### Table des métriques Validation
+
+    | **Best MAE** | **Best RMSE** | **Best MGAPE** |
+    | ---- | ---- | ---- |
+    | {self.train_record['best_mae']} | {self.train_record['best_mse']} | {self.train_record['best_mgape']} |
+
+    """
+            self.writer.add_text("validation_table", TABLE_VALID, global_step=self.epoch + 1)
 
         self.train_record = update_model(self.net, self.optimizer, self.scheduler, self.epoch, self.i_tb, self.exp_path,
                                          self.exp_name,
@@ -407,9 +405,16 @@ class Trainer():
             self.train_record_golden['best_mae'] = mae
             self.train_record_golden['best_mse'] = mse
             self.train_record_golden['best_mgape'] = mgape
-            table_valid = self.TABLE_VALID.format('Golden', self.train_record['best_mae'],
-                                                  self.train_record['best_mse'], self.train_record['best_mgape'])
-            self.writer.add_text("golden_table", table_valid, global_step=self.epoch + 1)
+            TABLE_VALID = f"""
+    ### Table des métriques Golden
+
+    | **Best MAE** | **Best RMSE** | **Best MGAPE** |
+    | ---- | ---- | ---- |
+    | {self.train_record['best_mae']} | {self.train_record['best_mse']} | {self.train_record['best_mgape']} |
+
+    """
+
+            self.writer.add_text("golden_table", TABLE_VALID, global_step=self.epoch + 1)
 
         # self.train_record_golden = update_model(self.net,self.optimizer,self.scheduler,self.epoch,
         # self.i_tb,self.exp_path,self.exp_name,[mae, mse, 0, loss],self.train_record_golden, None)
