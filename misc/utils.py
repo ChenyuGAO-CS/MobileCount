@@ -444,6 +444,8 @@ def get_mean_and_std_by_channel(loader):
     for i, data in tqdm(enumerate(loader, 0)):
 
         img, gt_map = data
+        if img is None:
+            continue
         # Mean over batch, height and width, but not over the channels
         channels_sum += torch.mean(img, dim=[0, 2, 3])
         channels_squared_sum += torch.mean(img ** 2, dim=[0, 2, 3])
@@ -466,6 +468,8 @@ def get_mean_and_std_by_channel_2(loader):
     for i, data in tqdm(enumerate(loader, 0)):
         
         img, gt_map = data
+        if img is None:
+            continue
         b, c, h, w = img.shape
         nb_pixels = b * h * w
         sum_ = torch.sum(images, dim=[0, 2, 3])

@@ -23,7 +23,7 @@ tests_dictionary = {
     "SHHA": {"LIST_C_DATASETS": [(CustomSHH, '/workspace/data/shanghaiTech/part_A_final/')],
              "VAL_BATCH_SIZE": 1,                      
              "MEAN_STD_REFERENCE": ([0.410824894905, 0.370634973049, 0.359682112932], [0.278580576181, 0.26925137639, 0.27156367898]),
-             "RECALCULATE": True
+             "RECALCULATE": False
              },
     "SHHB": {"LIST_C_DATASETS": [(CustomSHH, '/workspace/data/shanghaiTech/part_B_final/')],
              "VAL_BATCH_SIZE": 1,  
@@ -35,16 +35,10 @@ tests_dictionary = {
              "MEAN_STD_REFERENCE": ([0.302234709263, 0.291243076324, 0.269087553024], [0.227743327618, 0.211051672697, 0.184846073389]),
              "RECALCULATE": False
              },
-    "GOLDEN": {"LIST_C_DATASETS": [(CustomCCLabeler, '/workspace/cclabeler/')],
-             "PATH_SETTINGS":{'GD__index_filepath':'/workspace/cclabeler/users/golden.json'},
-             "VAL_BATCH_SIZE": 1,  
-             "MEAN_STD_REFERENCE": ([0.302234709263, 0.291243076324, 0.269087553024], [0.227743327618, 0.211051672697, 0.184846073389]),
-             "RECALCULATE": True
-             },
     "BACKGROUND": {"LIST_C_DATASETS": [(CustomCCLabeler, '/workspace/cclabeler/')],
-             "PATH_SETTINGS":{'BG__index_filepath':'/workspace/cclabeler/users/background.json'},
+             "PATH_SETTINGS":{'BG__index_filepath':'/workspace/cclabeler/users/user4.json'},
              "VAL_BATCH_SIZE": 1,  
-             "False": ([0.302234709263, 0.291243076324, 0.269087553024], [0.227743327618, 0.211051672697, 0.184846073389]),
+             "MEAN_STD_REFERENCE": ([0.45974895, 0.46210653, 0.4612845], [0.26007423, 0.26102763, 0.28212583]),
              "RECALCULATE": True
              },
     "SHHA+SHHB+GCC": {"LIST_C_DATASETS": [(CustomSHH, '/workspace/data/shanghaiTech/part_A_final/'), (CustomSHH, '/workspace/data/shanghaiTech/part_B_final/')],
@@ -75,14 +69,9 @@ if __name__ == '__main__':
             print("\nDataset:", dataset_name)
             
             path_settings = cfg_data.PATH_SETTINGS
-            print('path_settings:',path_settings)
             if "PATH_SETTINGS" in record:
-                print('yes')
                 for key, value in record['PATH_SETTINGS'].items():
-                    print(key, value)
-                    path_settings[key] = value
-            print('path_settings NEW:',path_settings)
-            
+                    path_settings[key] = value          
 
             val_set = DynamicDataset(couple_datasets=record['LIST_C_DATASETS'],
                                      mode='train',
