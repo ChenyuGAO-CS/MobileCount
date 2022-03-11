@@ -67,7 +67,7 @@ __C.VISIBLE_NUM_IMGS = 1 #  must be 1 for training images with the different siz
 
 
 # Infer on Golden dataset
-__C.INFER_GOLDEN_DATASET = False
+__C.INFER_GOLDEN_DATASET = True
 
 # L1 loss reduction
 __C.L1_LOSS_REDUCTION = "mean"
