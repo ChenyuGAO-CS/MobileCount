@@ -15,6 +15,8 @@ class CustomCCLabeler(CustomDataset):
         # like: '/workspace/cclabeler/users/golden.json' for Golden
         # or '/workspace/cclabeler/users/user4.json' or Background
         self.gt_index_filepath = kwargs.get('CC__index_filepath', None)
+        if self.gt_index_filepath is None:
+            raise ValueError('Must specify `CC__index_filepath` parameter')
         
         if 'background' in self.gt_index_filepath:
             self.gt_format = kwargs.get('BG__gt_format', '.json')
@@ -22,9 +24,9 @@ class CustomCCLabeler(CustomDataset):
         elif 'golden' in self.gt_index_filepath:
             self.transform = kwargs.get('GD__transform', None)
             self.gt_format = kwargs.get('GD__gt_format', '.json')
-            
-        if self.gt_index_filepath is None:
-            raise ValueError('Must specify `CC__index_filepath` parameter')
+        else:
+            raise NotImplementedError
+
         self.folder = folder
         self.mode = mode
         
