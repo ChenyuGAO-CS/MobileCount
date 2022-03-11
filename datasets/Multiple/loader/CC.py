@@ -30,7 +30,7 @@ class CustomCCLabeler(CustomDataset):
         self.folder = folder
         self.mode = mode
         
-        if self.mode = 'test':
+        if self.mode == 'test':
             self.dataset = pd.DataFrame([])
             return
         self.dataset = self.read_index()
