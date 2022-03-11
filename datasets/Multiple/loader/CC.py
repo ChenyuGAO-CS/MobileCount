@@ -14,19 +14,23 @@ class CustomCCLabeler(CustomDataset):
         super().__init__()
         # like: '/workspace/cclabeler/users/golden.json' for Golden
         # or '/workspace/cclabeler/users/user4.json' or Background
-        if mode == 'train':
+        self.gt_index_filepath = kwargs.get('CC__index_filepath', None)
+        
+        if 'background' in self.gt_index_filepath:
             self.gt_format = kwargs.get('BG__gt_format', '.json')
-            self.gt_index_filepath = kwargs.get('BG__index_filepath', None)
             self.transform = kwargs.get('BG__transform', None)
-        else:
-            self.gt_index_filepath = kwargs.get('GD__index_filepath', None)
+        elif 'golden' in self.gt_index_filepath:
             self.transform = kwargs.get('GD__transform', None)
             self.gt_format = kwargs.get('GD__gt_format', '.json')
             
         if self.gt_index_filepath is None:
-            raise ValueError('Must specify `<BG or GD>__index_filepath` parameter')
+            raise ValueError('Must specify `CC__index_filepath` parameter')
         self.folder = folder
         self.mode = mode
+        
+        if self.mode = 'test':
+            self.dataset = pd.DataFrame([])
+            return
         self.dataset = self.read_index()
         
     def read_index(self):
