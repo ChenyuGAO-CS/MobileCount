@@ -184,8 +184,8 @@ class Trainer():
         self.TABLE_VALID = f"""
 ### Table des métriques Validation
 
-| **Best MAE** | **Best RMSE** | **Best MGAPE** | **Best Loss** |
-| ---- | ---- | ---- | ---- |
+| **Best MAE** | **Best RMSE** | **Best MGAPE** |
+| ---- | ---- | ---- |
 | {self.train_record['best_mae']} | {self.train_record['best_mse']} | {self.train_record['best_mgape']} | 
 
 """
@@ -392,8 +392,8 @@ class Trainer():
         self.TABLE_GOLDEN = f"""
 ### Table des métriques Golden
 
-| **Best MAE** | **Best RMSE** | **Best MGAPE** | **Best Loss** |
-| ---- | ---- | ---- | ---- |
+| **Best MAE** | **Best RMSE** | **Best MGAPE** |
+| ---- | ---- | ---- | 
 | {self.train_record_golden['best_mae']} | {self.train_record_golden['best_mse']} | {self.train_record_golden['best_mgape']} | 
 
 """
