@@ -1,6 +1,7 @@
 import sys
 
 sys.path.append("../")
+sys.path.append("../../ia-foule-lab")
 
 import os
 import time
@@ -14,7 +15,7 @@ from datasets.Multiple.loader import DynamicDataset
 from datasets.Multiple.loader import CustomCCLabeler, CustomGCC, CustomSHH
 from datasets.Multiple.settings import cfg_data
 
-from misc.utils import get_mean_and_std_by_channel
+from iafoule.utils import get_mean_and_std_by_channel
 
 beginning_time = time.time()
 
