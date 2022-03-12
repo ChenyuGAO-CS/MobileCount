@@ -13,7 +13,7 @@ class CustomCCLabeler(CustomDataset):
     def __init__(self, folder, mode, **kwargs):
         super().__init__()
         # like: '/workspace/cclabeler/users/golden.json' for Golden
-        # or '/workspace/cclabeler/users/user4.json' or Background
+        # or '/workspace/cclabeler/users/background.json' or Background
         if mode == 'train':
             self.gt_format = kwargs.get('BG__gt_format', '.json')
             self.gt_index_filepath = kwargs.get('BG__index_filepath', None)
