@@ -24,20 +24,20 @@ tests_dictionary = {
     "SHHA": {"LIST_C_DATASETS": [(CustomSHH, '/workspace/data/shanghaiTech/part_A_final/')],
              "VAL_BATCH_SIZE": 1,
              "MEAN_STD_REFERENCE": (
-             [0.410824894905, 0.370634973049, 0.359682112932], [0.278580576181, 0.26925137639, 0.27156367898]),
+                 [0.410824894905, 0.370634973049, 0.359682112932], [0.278580576181, 0.26925137639, 0.27156367898]),
              "RECALCULATE": True
              },
     "SHHB": {"LIST_C_DATASETS": [(CustomSHH, '/workspace/data/shanghaiTech/part_B_final/')],
              "VAL_BATCH_SIZE": 1,
              "MEAN_STD_REFERENCE": (
-             [0.452016860247, 0.447249650955, 0.431981861591], [0.23242045939, 0.224925786257, 0.221840232611]),
+                 [0.452016860247, 0.447249650955, 0.431981861591], [0.23242045939, 0.224925786257, 0.221840232611]),
              "RECALCULATE": True
              },
     "GCC": {"LIST_C_DATASETS": [(CustomGCC, '/workspace/data/GCC')],
             "VAL_BATCH_SIZE": 1,
             "MEAN_STD_REFERENCE": (
-            [0.302234709263, 0.291243076324, 0.269087553024], [0.227743327618, 0.211051672697, 0.184846073389]),
-            "RECALCULATE": False
+                [0.302234709263, 0.291243076324, 0.269087553024], [0.227743327618, 0.211051672697, 0.184846073389]),
+            "RECALCULATE": True
             },
     "BACKGROUND": {"LIST_C_DATASETS": [(CustomCCLabeler, '/workspace/cclabeler/')],
                    "PATH_SETTINGS": {'BG__index_filepath': '/workspace/cclabeler/users/background.json'},
@@ -52,8 +52,8 @@ tests_dictionary = {
                                  "PATH_SETTINGS": {'BG__index_filepath': '/workspace/cclabeler/users/background.json'},
                                  "VAL_BATCH_SIZE": 1,
                                  "MEAN_STD_REFERENCE": (
-                                 [0.32202065, 0.311729, 0.29429936], [0.23350027, 0.21823275, 0.19834095]),
-                                 "RECALCULATE": False
+                                     [0.32202065, 0.311729, 0.29429936], [0.23350027, 0.21823275, 0.19834095]),
+                                 "RECALCULATE": True
                                  },
 }
 
