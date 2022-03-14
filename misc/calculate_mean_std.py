@@ -41,7 +41,7 @@ tests_dictionary = {
             "RECALCULATE": True
             },
     "BACKGROUND": {"LIST_C_DATASETS": [(CustomCCLabeler, '/workspace/cclabeler/')],
-                   "PATH_SETTINGS": {'BG__index_filepath': '/workspace/cclabeler/users/background.json'},
+                   "PATH_SETTINGS": {'BG__index_filepath': '/workspace/cclabeler/users/user4.json'},
                    "VAL_BATCH_SIZE": 1,
                    "MEAN_STD_REFERENCE": ([0.45974886, 0.46210667, 0.46128407], [0.2600742, 0.2610275, 0.28212664]),
                    "RECALCULATE": True
@@ -50,7 +50,7 @@ tests_dictionary = {
                                                      (CustomSHH, '/workspace/data/shanghaiTech/part_B_final/'),
                                                      (CustomGCC, '/workspace/data/GCC'),
                                                      (CustomCCLabeler, '/workspace/cclabeler/')],
-                                 "PATH_SETTINGS": {'BG__index_filepath': '/workspace/cclabeler/users/background.json'},
+                                 "PATH_SETTINGS": {'BG__index_filepath': '/workspace/cclabeler/users/user4.json'},
                                  "VAL_BATCH_SIZE": 1,
                                  "MEAN_STD_REFERENCE": (
                                      [0.32202065, 0.311729, 0.29429936], [0.23350027, 0.21823275, 0.19834095]),

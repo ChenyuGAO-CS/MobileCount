@@ -74,8 +74,8 @@ __C.L1_LOSS_REDUCTION = "mean"
 
 # Custom LOSS
 __C.CUSTOM_LOSS = True
-__C.CUSTOM_LOSS_LAMBDA = 10
-__C.CUSTOM_LOSS_SIZES = (2, 4)
+__C.CUSTOM_LOSS_LAMBDA = 0.1
+__C.CUSTOM_LOSS_SIZES = (2, 4, 8)
 
 #================================================================================
 #================================================================================
