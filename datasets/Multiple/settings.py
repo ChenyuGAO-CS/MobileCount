@@ -30,7 +30,7 @@ __C_DYN.TRAIN_BATCH_SIZE = 3
 __C_DYN.VAL_BATCH_SIZE = 1
 __C_DYN.PATH_SETTINGS = {'GCC__gt_folder': '/workspace/home/gameiroth/data/GCC/density/maps_adaptive_kernel/',
                          'SHH__gt_name_folder': 'maps_fixed_kernel',
-                         'CC__index_folder' : '/workspace/cclabeler/users/background.json'}
+                         'CC__index_filepath' : '/workspace/cclabeler/users/background.json'}
 
 
 #- GCC : 
