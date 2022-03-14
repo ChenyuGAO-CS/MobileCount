@@ -14,15 +14,22 @@ def loading_data():
     cl = CollateFN(cfg_data.TRAIN_SIZE)
     collate = cl.collate if cfg_data.COLLATE_FN and cfg_data.TRAIN_BATCH_SIZE != 1 else None
     
-    # choose differents combinaison of transformations
-    """
-    train_main_transform = own_transforms.Compose([
+    # add here specific func : 
+    # choose differents combinaison of transformations for each dataset
+    
+    train_main_transform_SHHA = own_transforms.Compose([
         own_transforms.RandomDownOverSampling(cfg_data.RANDOM_DOWNOVER_SAMPLING),
         own_transforms.RandomDownSampling(cfg_data.RANDOM_DOWN_SAMPLING),
         own_transforms.RandomCrop(cfg_data.TRAIN_SIZE),
         own_transforms.RandomHorizontallyFlip()
     ])
-    """
+    
+    specific_transform = {"SHHA__transform" : train_main_transform_SHHA }
+    
+    if specific_transform:
+        cfg_data.PATH_SETTINGS.update(specific_transform)
+
+    # global transform
     train_main_transform = own_transforms.Compose([
         own_transforms.RandomHorizontallyFlip()
     ])
@@ -36,8 +43,7 @@ def loading_data():
         own_transforms.LabelNormalize(log_para)
     ])
 
-    train_set = DynamicDataset(folder_datasets=cfg_data.LIST_DATA_PATH,
-                              class_datasets=cfg_data.LIST_CLASSES,
+    train_set = DynamicDataset(couple_datasets=cfg_data.LIST_C_DATASETS,
                               mode='train',
                               main_transform=train_main_transform,
                               img_transform=img_transform,
@@ -52,8 +58,7 @@ def loading_data():
                               shuffle=True, 
                               drop_last=True)
     
-    val_set = DynamicDataset(folder_datasets=cfg_data.LIST_DATA_PATH,
-                              class_datasets=cfg_data.LIST_CLASSES,
+    val_set = DynamicDataset(couple_datasets=cfg_data.LIST_C_DATASETS,
                               mode='test',
                               main_transform=None,
                               img_transform=img_transform,

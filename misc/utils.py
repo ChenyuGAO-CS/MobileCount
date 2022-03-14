@@ -210,28 +210,26 @@ def print_GCC_summary(log_txt,epoch, scores,train_record,c_maes,c_mses):
     print( '='*50 )   
 
 
-def update_model(net,optimizer,scheduler,epoch,i_tb,exp_path,exp_name,scores,train_record,log_file=None):
+def update_model(net,optimizer,scheduler,epoch,i_tb,exp_path,exp_name,scores,train_record,log_file=None, best_metric='best_mae'):
 
     mae, mse, mgape, loss = scores
 
     snapshot_name = 'all_ep_%d_mae_%.1f_rmse_%.1f_mgape_%.1f' % (epoch + 1, mae, mse, mgape)
-
-    if mae < train_record['best_mae']:
+    
+    metric = mae
+    #TODO a adapter pour changer de comparaison de metrique
+    if metric < train_record[best_metric]:
         best_state = {'train_record':train_record, 'net':net.state_dict(), 'optimizer':optimizer.state_dict(),\
                 'scheduler':scheduler.state_dict(), 'epoch': epoch, 'i_tb':i_tb, 'exp_path':exp_path, \
                 'exp_name':exp_name}
         train_record['best_model_name'] = snapshot_name
+        train_record['best_mae'] = mae
+        train_record['best_mse'] = mse 
+        train_record['best_mgape'] = mgape         
         if log_file is not None:
             logger_txt(log_file,epoch,scores)
         #to_saved_weight = net.state_dict()
         torch.save(best_state, os.path.join(exp_path, exp_name, 'best_state.pth'))
-
-    if mae < train_record['best_mae']:           
-        train_record['best_mae'] = mae
-    if mse < train_record['best_mse']:
-        train_record['best_mse'] = mse 
-    if mgape < train_record['best_mgape']:
-        train_record['best_mgape'] = mgape 
         
     latest_state = {'train_record':train_record, 'net':net.state_dict(), 'optimizer':optimizer.state_dict(),\
                     'scheduler':scheduler.state_dict(), 'epoch': epoch, 'i_tb':i_tb, 'exp_path':exp_path, \
@@ -425,7 +423,7 @@ def get_grid_metrics(prediction_map, ground_truth_map, metric_grid, debug=False)
         print('gt_nb_person:',gt_nb_person)
         
     #grid absolute percentage error
-    gape = matrix_final.sum()/gt_nb_person
+    gape = 100.*matrix_final.sum()/gt_nb_person
     if debug:
         print('gape:',gape)
         
