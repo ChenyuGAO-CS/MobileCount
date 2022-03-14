@@ -9,9 +9,9 @@ cfg_data = __C_DYN
 
 __C_DYN.IMAGE_SIZE = None
 __C_DYN.TRAIN_SIZE = (1000, 800)
-__C_DYN.LIST_DATA_PATH = [(CustomGCC, '/workspace/data/GCC'), 
+__C_DYN.LIST_C_DATASETS = [(CustomGCC, '/workspace/data/GCC'), 
                           (CustomSHH, '/workspace/data/shanghaiTech/part_A_final/'), 
-                          (CustomSHH, '/workspace/data/shanghaiTech/part_B_final/'),
+                          (CustomSHH, '/workspace/data/shanghaiTech/part_B_final/')
                           (CustomCCLabeler,  '/workspace/cclabeler/')]
 __C_DYN.MEAN_STD = ([1, 1, 1], 
                     [1, 1, 1])

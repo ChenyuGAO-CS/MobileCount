@@ -46,7 +46,6 @@ elif data_mode == 'Multiple':
 
 cfg_data.update(cfg)
 #------------Prepare Trainer------------
-cfg_data.update(cfg)
 net = cfg.NET
 from trainer import Trainer
 

@@ -41,16 +41,10 @@ class CustomCCLabeler(CustomDataset):
         
         json_data = {}
         for n, im in enumerate(list_data):
-            image_path = os.path.join(self.folder, 'images',  im)
-            try:
-                img = Image.open(image_path)
-                json_data[n] = {"path_img": image_path,
-                               "path_gt":  os.path.join(self.folder, 'jsons' + "/" + im + ".json"),
-                               "gt_count": None,
-                               "folder": self.folder}
-            except Exception as e:
-                print('Cannot read image :',image_path, '- error :',str(e))
-
+            json_data[n] = {"path_img": os.path.join(self.folder, 'images',  im),
+                           "path_gt":  os.path.join(self.folder, 'jsons',  im + ".json"),
+                           "gt_count": None,
+                           "folder": self.folder}
         df = pd.DataFrame.from_dict(json_data, orient='index')
         return df
     
@@ -65,10 +59,7 @@ class CustomCCLabeler(CustomDataset):
 
             ds = np.zeros(shape)
             for x, y in points:
-                try:
-                    ds[x, y] += 1
-                except Exception as e:
-                    print('Point outside of the image point ({},{}) - shape {} filename: {}'.format(x,y,shape,filename))
+                ds[x, y] += 1
             den = ds.astype('uint8').T
             return den
             # if we want return PIL: Image.fromarray(den)
