@@ -1,1 +1,1 @@
-from .loader import CustomGCC, CustomSHH, DynamicDataset, CustomDataset, CollateFN
+from .loader import CustomCCLabeler, CustomGCC, CustomSHH, DynamicDataset, CustomDataset, CollateFN
