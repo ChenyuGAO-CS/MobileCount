@@ -50,7 +50,7 @@ class CustomCCLabeler(CustomDataset):
                                "gt_count": None,
                                "folder": self.folder}
             except Exception as e:
-                lg.warning(f'Cannot read image: {image_path}, error : {str(e)})
+                lg.warning(f'Cannot read image: {image_path}, error: {str(e)}')
         df = pd.DataFrame.from_dict(json_data, orient='index')
         return df
     
