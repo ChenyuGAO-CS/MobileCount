@@ -73,6 +73,7 @@ class Trainer():
             # validation
             if epoch % self.cfg.VAL_FREQ == 0 or epoch > self.cfg.VAL_DENSE_START:
                 self.timer['val time'].tic()
+                best_model = False
                 if self.data_mode in ['SHHA', 'SHHB', 'QNRF', 'UCF50', 'Multiple']:
                     best_model = self.validate_V1()
                 elif self.data_mode == 'WE':
@@ -111,7 +112,7 @@ class Trainer():
                 self.i_tb += 1
                 self.writer.add_scalar('train_loss', loss.item(), self.i_tb)
                 self.timer['iter time'].toc(average=False)
-                print('[ep %d][it %d][loss %.4f][lc_loss %.4f][lr %.4f][%.2fs]' % \
+                print('[ep %d][it %d][loss %.4f][lc_loss %.4f][lr %.4f][%.2fs]' %
                       (self.epoch + 1, i + 1, loss.item(), lc_loss, self.optimizer.param_groups[0]['lr'] * 10000,
                        self.timer['iter time'].diff))
                 print('        [cnt: gt: %.1f pred: %.2f]' % (
@@ -182,11 +183,11 @@ class Trainer():
             metric = mgape
 
         if metric < self.train_record[best_metric]:
-            
-            self.train_record, best_model = update_model(self.net, self.optimizer, self.scheduler, self.epoch, self.i_tb, self.exp_path,
-                                         self.exp_name,
-                                         [mae, mse, mgape, loss], self.train_record, self.log_txt,
-                                         best_metric=best_metric)
+            self.train_record, best_model = update_model(self.net, self.optimizer, self.scheduler, self.epoch,
+                                                         self.i_tb, self.exp_path,
+                                                         self.exp_name,
+                                                         [mae, mse, mgape, loss], self.train_record, self.log_txt,
+                                                         best_metric=best_metric)
             self.TABLE_VALID = f"""
 ### Table des métriques Validation
 | **Best MAE** | **Best RMSE** | **Best MGAPE** |
@@ -198,7 +199,6 @@ class Trainer():
         print_summary(self.exp_name, [mae, mse, mgape, loss], self.train_record)
 
         return best_model
-
 
     def validate_V2(self):
         """
@@ -377,20 +377,22 @@ class Trainer():
                     mses.update((gt_count - pred_cnt) * (gt_count - pred_cnt))
 
                     metric_grid = (4, 4)
-                    print('pred_map:',pred_map[i_img].squeeze())
-                    print('gt_count:',gt_count[i_img])
+                    print('pred_map:', pred_map[i_img].squeeze())
+                    print('gt_count:', gt_count[i_img])
                     print('img.shape:', img.shape)
-                    width = img.shape[0]
-                    height = img.shape[1]
-                    print('width:',width)
+                    width = img.shape[3]
+                    height = img.shape[2]
+                    print('width:', width)
                     print('height:', height)
                     print('gt_points:', type(gt_points), gt_points)
+                    gt_points = gt_points.numpy()
+                    print('gt_points:', type(gt_points), gt_points)
 
-
-                    gape, gcae = get_grid_metrics_with_points(width, height, pred_map[i_img].squeeze() / self.cfg.LOG_PARA,
-                                                  gt_points, #gt_count[i_img],
-                                                  metric_grid,
-                                                  debug=False)
+                    gape, gcae = get_grid_metrics_with_points(width, height,
+                                                              pred_map[i_img].squeeze() / self.cfg.LOG_PARA,
+                                                              gt_points,  # gt_count[i_img],
+                                                              metric_grid,
+                                                              debug=False)
                     mgapes.update(gape)
 
                 # if vi==0:
@@ -423,4 +425,4 @@ class Trainer():
         # self.train_record_golden = update_model(self.net,self.optimizer,self.scheduler,self.epoch,
         # self.i_tb,self.exp_path,self.exp_name,[mae, mse, 0, loss],self.train_record_golden, None)
 
-        print_summary(self.exp_name+"-Golden", [mae, mse, mgape, loss], self.train_record_golden)
+        print_summary(self.exp_name + "-Golden", [mae, mse, mgape, loss], self.train_record_golden)
