@@ -9,7 +9,7 @@ cfg = __C
 
 #------------------------------TRAIN------------------------
 __C.SEED = 3035 # random seed,  for reporduction
-__C.DATASET = 'SHHB' # dataset selection: SHHA, SHHB, UCF50, QNRF, WE, Multiple
+__C.DATASET = 'Multiple' # dataset selection: SHHA, SHHB, UCF50, QNRF, WE, Multiple
 
 if __C.DATASET == 'UCF50':# only for UCF50
 	from datasets.UCF50.setting import cfg_data
@@ -37,7 +37,7 @@ __C.LR = 1e-4 # learning rate
 __C.LR_DECAY = 0.995 # decay rate
 __C.LR_DECAY_START = -1 # when training epoch is more than it, the learning rate will be begin to decay
 __C.NUM_EPOCH_LR_DECAY = 1 # decay frequency
-__C.MAX_EPOCH = 500
+__C.MAX_EPOCH = 5
 
 # print 
 __C.PRINT_FREQ = 10
@@ -73,7 +73,7 @@ __C.INFER_GOLDEN_DATASET = True
 __C.L1_LOSS_REDUCTION = "mean"
 
 # Custom LOSS
-__C.CUSTOM_LOSS = True
+__C.CUSTOM_LOSS = False
 __C.CUSTOM_LOSS_LAMBDA = 10
 __C.CUSTOM_LOSS_SIZES = (2, 4)
 

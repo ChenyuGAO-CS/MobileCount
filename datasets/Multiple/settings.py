@@ -9,12 +9,14 @@ cfg_data = __C_DYN
 
 __C_DYN.IMAGE_SIZE = None
 __C_DYN.TRAIN_SIZE = (1000, 800)
-__C_DYN.LIST_C_DATASETS = [(CustomGCC, '/workspace/data/GCC'), 
-                          (CustomSHH, '/workspace/data/shanghaiTech/part_A_final/'), 
-                          (CustomSHH, '/workspace/data/shanghaiTech/part_B_final/')
-                          (CustomCCLabeler,  '/workspace/cclabeler/')]
-__C_DYN.MEAN_STD = ([1, 1, 1], 
-                    [1, 1, 1])
+__C_DYN.LIST_C_DATASETS = [#(CustomGCC, '/workspace/data/GCC'), 
+                          #(CustomSHH, '/workspace/data/shanghaiTech/part_A_final/'), 
+                          (CustomSHH, '/workspace/data/shanghaiTech/part_B_final/'),
+                          #(CustomCCLabeler,  '/workspace/cclabeler/')
+]
+#__C_DYN.MEAN_STD = ([1, 1, 1], [1, 1, 1])
+__C_DYN.MEAN_STD = ([0.452016860247, 0.447249650955, 0.431981861591],[0.23242045939, 0.224925786257, 0.221840232611])
+
 #__C_DYN.PROB = [0.2, 0.4, 0.4] # proba getting images
 __C_DYN.COLLATE_FN = True
 # better to remove because use in collate but no effect
@@ -26,11 +28,13 @@ __C_DYN.RANDOM_DOWNOVER_SAMPLING = -1
 __C_DYN.RANDOM_DOWN_SAMPLING = -1
 
 __C_DYN.RESUME_MODEL = '/data/models'
-__C_DYN.TRAIN_BATCH_SIZE = 3
+__C_DYN.TRAIN_BATCH_SIZE = 6
 __C_DYN.VAL_BATCH_SIZE = 1
-__C_DYN.PATH_SETTINGS = {'GCC__gt_folder': '/workspace/home/gameiroth/data/GCC/density/maps_adaptive_kernel/',
+__C_DYN.PATH_SETTINGS = {
+    #'GCC__gt_folder': '/workspace/home/gameiroth/data/GCC/density/maps_adaptive_kernel/',
                          'SHH__gt_name_folder': 'maps_fixed_kernel',
-                         'CC__index_folder' : '/workspace/cclabeler/users/background.json'}
+                         #'CC__index_filepath' : '/workspace/cclabeler/users/background.json'
+                        }
 
 
 #- GCC : 

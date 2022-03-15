@@ -73,7 +73,7 @@ class Trainer():
             # validation
             if epoch % self.cfg.VAL_FREQ == 0 or epoch > self.cfg.VAL_DENSE_START:
                 self.timer['val time'].tic()
-                if self.data_mode in ['SHHA', 'SHHB', 'QNRF', 'UCF50']:
+                if self.data_mode in ['SHHA', 'SHHB', 'QNRF', 'UCF50', 'Multiple']:
                     self.validate_V1()
                 elif self.data_mode == 'WE':
                     self.validate_V2()
@@ -182,6 +182,11 @@ class Trainer():
             metric = mgape
 
         if metric < self.train_record[best_metric]:
+            
+            self.train_record = update_model(self.net, self.optimizer, self.scheduler, self.epoch, self.i_tb, self.exp_path,
+                                         self.exp_name,
+                                         [mae, mse, mgape, loss], self.train_record, self.log_txt,
+                                         best_metric=best_metric)
             self.TABLE_VALID = f"""
 ### Table des métriques Validation
 | **Best MAE** | **Best RMSE** | **Best MGAPE** |
@@ -189,11 +194,6 @@ class Trainer():
 | {self.train_record['best_mae']} | {self.train_record['best_mse']} | {self.train_record['best_mgape']} | 
 """
             self.writer.add_text("validation_table", self.TABLE_VALID, global_step=self.epoch + 1)
-            
-        self.train_record = update_model(self.net, self.optimizer, self.scheduler, self.epoch, self.i_tb, self.exp_path,
-                                         self.exp_name,
-                                         [mae, mse, mgape, loss], self.train_record, self.log_txt,
-                                         best_metric=best_metric)
 
         print_summary(self.exp_name, [mae, mse, mgape, loss], self.train_record)
 
@@ -411,6 +411,12 @@ class Trainer():
 | {self.train_record_golden['best_mae']} | {self.train_record_golden['best_mse']} | {self.train_record_golden['best_mgape']} | 
 """
             self.writer.add_text("validation_golden", self.TABLE_GOLDEN, global_step=self.epoch + 1)
+            
+            latest_state = {'train_record':self.train_record, 'net':self.net.state_dict(), 'optimizer':self.optimizer.state_dict(),\
+                    'scheduler':self.scheduler.state_dict(), 'epoch': self.epoch, 'i_tb':self.i_tb, 'exp_path':self.exp_path, \
+                    'exp_name':self.exp_name}
+
+            torch.save(latest_state,os.path.join(self.exp_path, self.exp_name, 'best_state_golden.pth'))
 
         # self.train_record_golden = update_model(self.net,self.optimizer,self.scheduler,self.epoch,
         # self.i_tb,self.exp_path,self.exp_name,[mae, mse, 0, loss],self.train_record_golden, None)

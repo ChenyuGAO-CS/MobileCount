@@ -215,7 +215,7 @@ def update_model(net,optimizer,scheduler,epoch,i_tb,exp_path,exp_name,scores,tra
     mae, mse, mgape, loss = scores
 
     snapshot_name = 'all_ep_%d_mae_%.1f_rmse_%.1f_mgape_%.1f' % (epoch + 1, mae, mse, mgape)
-    
+    best_model = False
     metric = mae
     #TODO a adapter pour changer de comparaison de metrique
     if metric < train_record[best_metric]:
@@ -229,6 +229,7 @@ def update_model(net,optimizer,scheduler,epoch,i_tb,exp_path,exp_name,scores,tra
         if log_file is not None:
             logger_txt(log_file,epoch,scores)
         #to_saved_weight = net.state_dict()
+        best_model = True
         torch.save(best_state, os.path.join(exp_path, exp_name, 'best_state.pth'))
         
     latest_state = {'train_record':train_record, 'net':net.state_dict(), 'optimizer':optimizer.state_dict(),\
@@ -237,7 +238,7 @@ def update_model(net,optimizer,scheduler,epoch,i_tb,exp_path,exp_name,scores,tra
 
     torch.save(latest_state,os.path.join(exp_path, exp_name, 'latest_state.pth'))
 
-    return train_record
+    return train_record, best_model
 
 
 def copy_cur_env(work_dir, dst_dir, exception):
