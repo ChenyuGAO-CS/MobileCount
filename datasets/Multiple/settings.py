@@ -12,10 +12,10 @@ __C_DYN.TRAIN_SIZE = (1000, 800)
 __C_DYN.LIST_C_DATASETS = [#(CustomGCC, '/workspace/data/GCC'), 
                           #(CustomSHH, '/workspace/data/shanghaiTech/part_A_final/'), 
                           (CustomSHH, '/workspace/data/shanghaiTech/part_B_final/'),
-                          #(CustomCCLabeler,  '/workspace/cclabeler/')
+                          (CustomCCLabeler,  '/workspace/cclabeler/'),
 ]
 #__C_DYN.MEAN_STD = ([1, 1, 1], [1, 1, 1])
-__C_DYN.MEAN_STD = ([0.452016860247, 0.447249650955, 0.431981861591],[0.23242045939, 0.224925786257, 0.221840232611])
+__C_DYN.MEAN_STD = ([0.4551607, 0.45352426, 0.44445348], [0.24763596, 0.24388753, 0.25247648])
 
 #__C_DYN.PROB = [0.2, 0.4, 0.4] # proba getting images
 __C_DYN.COLLATE_FN = True
@@ -33,7 +33,7 @@ __C_DYN.VAL_BATCH_SIZE = 1
 __C_DYN.PATH_SETTINGS = {
     #'GCC__gt_folder': '/workspace/home/gameiroth/data/GCC/density/maps_adaptive_kernel/',
                          'SHH__gt_name_folder': 'maps_fixed_kernel',
-                         #'CC__index_filepath' : '/workspace/cclabeler/users/background.json'
+                         'CC__index_filepath' : '/workspace/cclabeler/users/background.json'
                         }
 
 
