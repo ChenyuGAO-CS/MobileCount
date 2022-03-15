@@ -353,7 +353,7 @@ class Trainer():
         golden_val_loader = loading_data()
 
         for vi, data in enumerate(golden_val_loader, 0):
-            img, gt_count = data
+            img, gt_count, gt_points = data
 
             with torch.no_grad():
                 img = Variable(img)
@@ -379,12 +379,16 @@ class Trainer():
                     metric_grid = (4, 4)
                     print('pred_map:',pred_map[i_img].squeeze())
                     print('gt_count:',gt_count[i_img])
+                    print('img.shape:', img.shape)
                     width = img.shape[0]
                     height = img.shape[1]
                     print('width:',width)
                     print('height:', height)
+                    print('gt_points:', type(gt_points), gt_points)
+
+
                     gape, gcae = get_grid_metrics_with_points(width, height, pred_map[i_img].squeeze() / self.cfg.LOG_PARA,
-                                                  gt_count[i_img],
+                                                  gt_points, #gt_count[i_img],
                                                   metric_grid,
                                                   debug=False)
                     mgapes.update(gape)
