@@ -385,12 +385,12 @@ class Trainer():
                     print('width:', width)
                     print('height:', height)
                     print('gt_points:', type(gt_points), gt_points)
-                    gt_points = gt_points.numpy()
-                    print('gt_points:', type(gt_points), gt_points)
+                    ground_truth = [{'x': point['x'].item(), 'y': point['y'].item()} for point in gt_points]
+                    print('ground_truth:', type(ground_truth), ground_truth)
 
                     gape, gcae = get_grid_metrics_with_points(width, height,
                                                               pred_map[i_img].squeeze() / self.cfg.LOG_PARA,
-                                                              gt_points,  # gt_count[i_img],
+                                                              ground_truth,  # gt_count[i_img],
                                                               metric_grid,
                                                               debug=False)
                     mgapes.update(gape)
