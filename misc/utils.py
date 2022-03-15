@@ -436,3 +436,77 @@ def get_grid_metrics(prediction_map, ground_truth_map, metric_grid, debug=False)
     return gape, gcae
 
 
+def get_grid_metrics_with_points(width, height, density_map, ground_truth, metric_grid, debug=False):
+    matrix_points = np.zeros(metric_grid)
+
+    n_w = int(math.ceil(width / metric_grid[0]))
+    n_h = int(math.ceil(height / metric_grid[1]))
+    for iw in range(metric_grid[0]):
+
+        x_start = iw * n_w
+        x_stop = (iw + 1) * n_w
+        if x_stop > width:
+            x_stop = width
+
+        for ih in range(metric_grid[1]):
+
+            y_start = ih * n_h
+            y_stop = (ih + 1) * n_h
+            if y_stop > height:
+                y_stop = height
+
+            nb_points = 0
+            for (xx, yy) in ground_truth:
+                if xx >= x_start and xx < x_stop and yy >= y_start and yy < y_stop:
+                    if debug:
+                        print("point:", xx, yy)
+                    nb_points += 1
+            matrix_points[iw, ih] = nb_points
+            if debug:
+                print('iw:', iw, 'x_start:', x_start, 'x_stop:', x_stop, 'ih:', ih, 'y_start:', y_start, 'y_stop:',
+                      y_stop)
+                print("nb_points:", nb_points)
+
+    matrix_density_map = np.zeros(metric_grid)
+
+    dm_width = density_map.shape[1]
+    dm_height = density_map.shape[0]
+    if debug:
+        print('dm_width:', dm_width)
+        print('dm_height:', dm_height)
+
+    n_w = int(math.ceil(dm_width / metric_grid[0]))
+    n_h = int(math.ceil(dm_height / metric_grid[1]))
+    for iw in range(metric_grid[0]):
+
+        x_start = iw * n_w
+        x_stop = (iw + 1) * n_w
+        if x_stop > dm_width:
+            x_stop = dm_width
+
+        for ih in range(metric_grid[1]):
+
+            y_start = ih * n_h
+            y_stop = (ih + 1) * n_h
+            if y_stop > dm_height:
+                y_stop = dm_height
+
+            sub_density_map = density_map[y_start:y_stop, x_start:x_stop]
+            matrix_density_map[iw, ih] = sub_density_map.sum()
+            if debug:
+                print('iw:', iw, 'x_start:', x_start, 'x_stop:', x_stop, 'ih:', ih, 'y_start:', y_start, 'y_stop:',
+                      y_stop)
+                print("sub_density_map(sum):", sub_density_map.sum())
+
+    matrix_difference = matrix_density_map - matrix_points
+
+    matrix_final = matrix_difference.round()
+    matrix_final = np.absolute(matrix_final)
+
+    # grid absolute percentage error
+    matrix_points_sum = matrix_points.sum()
+    if matrix_points_sum == 0:
+        matrix_points_sum = 1
+    gape = matrix_final.sum() / matrix_points_sum
+
+    return gape, matrix_points, matrix_density_map, matrix_difference, matrix_final

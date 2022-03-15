@@ -74,15 +74,15 @@ class Trainer():
             if epoch % self.cfg.VAL_FREQ == 0 or epoch > self.cfg.VAL_DENSE_START:
                 self.timer['val time'].tic()
                 if self.data_mode in ['SHHA', 'SHHB', 'QNRF', 'UCF50', 'Multiple']:
-                    self.validate_V1()
+                    best_model = self.validate_V1()
                 elif self.data_mode == 'WE':
-                    self.validate_V2()
+                    best_model = self.validate_V2()
                 elif self.data_mode == 'GCC':
-                    self.validate_V3()
+                    best_model = self.validate_V3()
                 self.timer['val time'].toc(average=False)
                 print('val time: {:.2f}s'.format(self.timer['val time'].diff))
 
-                if self.cfg.INFER_GOLDEN_DATASET:
+                if best_model and self.cfg.INFER_GOLDEN_DATASET:
                     self.validate_GD()
 
     def train(self):  # training for all datasets
@@ -183,7 +183,7 @@ class Trainer():
 
         if metric < self.train_record[best_metric]:
             
-            self.train_record = update_model(self.net, self.optimizer, self.scheduler, self.epoch, self.i_tb, self.exp_path,
+            self.train_record, best_model = update_model(self.net, self.optimizer, self.scheduler, self.epoch, self.i_tb, self.exp_path,
                                          self.exp_name,
                                          [mae, mse, mgape, loss], self.train_record, self.log_txt,
                                          best_metric=best_metric)
@@ -196,6 +196,9 @@ class Trainer():
             self.writer.add_text("validation_table", self.TABLE_VALID, global_step=self.epoch + 1)
 
         print_summary(self.exp_name, [mae, mse, mgape, loss], self.train_record)
+
+        return best_model
+
 
     def validate_V2(self):
         """
@@ -259,7 +262,10 @@ class Trainer():
         self.train_record = update_model(self.net, self.optimizer, self.scheduler, self.epoch, self.i_tb, self.exp_path,
                                          self.exp_name,
                                          [mae, 0, 0, loss], self.train_record, self.log_txt)
+
         print_WE_summary(self.log_txt, self.epoch, [mae, 0, 0, loss], self.train_record, maes)
+
+        return False
 
     def validate_V3(self):
         """
@@ -329,6 +335,8 @@ class Trainer():
 
         print_GCC_summary(self.log_txt, self.epoch, [mae, mse, 0, loss], self.train_record_golden, c_maes, c_mses)
 
+        return False
+
     def validate_GD(self):
         """
         validate_GD Validate for golden dataset
@@ -340,7 +348,7 @@ class Trainer():
         # losses = AverageMeter()
         maes = AverageMeter()
         mses = AverageMeter()
-        #mgapes = AverageMeter()
+        mgapes = AverageMeter()
 
         golden_val_loader = loading_data()
 
@@ -368,14 +376,18 @@ class Trainer():
                     maes.update(abs(gt_count - pred_cnt))
                     mses.update((gt_count - pred_cnt) * (gt_count - pred_cnt))
 
-                    #metric_grid = (4, 4)
-                    #print('pred_map:',pred_map[i_img].squeeze())
-                    #print('gt_count:',gt_count[i_img])
-                    #gape, gcae = get_grid_metrics(pred_map[i_img].squeeze() / self.cfg.LOG_PARA,
-                    #                              gt_count[i_img] / self.cfg.LOG_PARA,
-                    #                              metric_grid,
-                    #                              debug=False)
-                    #mgapes.update(gape)
+                    metric_grid = (4, 4)
+                    print('pred_map:',pred_map[i_img].squeeze())
+                    print('gt_count:',gt_count[i_img])
+                    width = img.shape[0]
+                    height = img.shape[1]
+                    print('width:',width)
+                    print('height:', height)
+                    gape, gcae = get_grid_metrics_with_points(width, height, pred_map[i_img].squeeze() / self.cfg.LOG_PARA,
+                                                  gt_count[i_img],
+                                                  metric_grid,
+                                                  debug=False)
+                    mgapes.update(gape)
 
                 # if vi==0:
                 #    vis_results(self.exp_name, self.epoch, self.writer, self.restore_transform, img, pred_map, gt_map)
@@ -385,38 +397,24 @@ class Trainer():
         loss = 0
         # loss = losses.avg
         mgape = 0
-        #mgape = mgapes.avg
+        mgape = mgapes.avg
 
         # self.writer.add_scalar('val_loss_golden', loss, self.epoch + 1)
         self.writer.add_scalar('mae_golden', mae, self.epoch + 1)
-        self.writer.add_scalar('mse_golden', mse, self.epoch + 1)
-        #self.writer.add_scalar('mgape_golden', mgape, self.epoch + 1)
+        self.writer.add_scalar('rmse_golden', mse, self.epoch + 1)
+        self.writer.add_scalar('mgape_golden', mgape, self.epoch + 1)
 
-        best_metric = 'best_mae'
-        metric = mae.item()
-        if best_metric == 'best_mse':
-            metric = mse.item()
-        #elif best_metric == 'best_mgape':
-        #    metric = mgape
+        self.train_record_golden['best_mae'] = mae.item()
+        self.train_record_golden['best_mse'] = mse.item()
+        self.train_record_golden['best_mgape'] = mgape.item()
 
-        if metric < self.train_record_golden[best_metric]:
-            self.train_record_golden['best_mae'] = mae.item()
-            self.train_record_golden['best_mse'] = mse.item()
-            self.train_record_golden['best_mgape'] = mgape
-            
-            self.TABLE_GOLDEN = f"""
+        self.TABLE_GOLDEN = f"""
 ### Table des métriques Golden
 | **Best MAE** | **Best RMSE** | **Best MGAPE** |
 | ---- | ---- | ---- |
 | {self.train_record_golden['best_mae']} | {self.train_record_golden['best_mse']} | {self.train_record_golden['best_mgape']} | 
 """
-            self.writer.add_text("validation_golden", self.TABLE_GOLDEN, global_step=self.epoch + 1)
-            
-            latest_state = {'train_record':self.train_record, 'net':self.net.state_dict(), 'optimizer':self.optimizer.state_dict(),\
-                    'scheduler':self.scheduler.state_dict(), 'epoch': self.epoch, 'i_tb':self.i_tb, 'exp_path':self.exp_path, \
-                    'exp_name':self.exp_name}
-
-            torch.save(latest_state,os.path.join(self.exp_path, self.exp_name, 'best_state_golden.pth'))
+        self.writer.add_text("validation_golden", self.TABLE_GOLDEN, global_step=self.epoch + 1)
 
         # self.train_record_golden = update_model(self.net,self.optimizer,self.scheduler,self.epoch,
         # self.i_tb,self.exp_path,self.exp_name,[mae, mse, 0, loss],self.train_record_golden, None)
