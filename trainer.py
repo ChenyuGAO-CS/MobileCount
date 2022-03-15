@@ -29,7 +29,7 @@ class Trainer():
         self.train_record = {'best_mae': 1e20, 'best_mse': 1e20, 'best_mgape': 1e20, 'best_model_name': ''}
         self.train_record_golden = {'best_mae': 1e20, 'best_mse': 1e20, 'best_mgape': 1e20, 'best_model_name': ''}
 
-        self.timer = {'iter time': Timer(), 'train time': Timer(), 'val time': Timer()}
+        self.timer = {'iter time': Timer(), 'train time': Timer(), 'val time': Timer(), 'val golden time': Timer()}
 
         self.epoch = 0
         self.i_tb = 0
@@ -84,7 +84,10 @@ class Trainer():
                 print('val time: {:.2f}s'.format(self.timer['val time'].diff))
 
                 if best_model and self.cfg.INFER_GOLDEN_DATASET:
+                    self.timer['val golden time'].tic()
                     self.validate_GD()
+                    self.timer['val golden time'].toc(average=False)
+                    print('val golden time: {:.2f}s'.format(self.timer['val golden time'].diff))
 
     def train(self):  # training for all datasets
         self.net.train()
@@ -176,7 +179,8 @@ class Trainer():
         self.writer.add_scalar('mgape', mgape, self.epoch + 1)
 
         best_model = False
-        if mae < self.train_record['best_mae']:
+        best_metric = 'best_mae'
+        if mae < self.train_record[best_metric]:
             self.train_record, best_model = update_model(self.net, self.optimizer, self.scheduler, self.epoch,
                                                          self.i_tb, self.exp_path,
                                                          self.exp_name,
@@ -335,8 +339,8 @@ class Trainer():
         """
         validate_GD Validate for golden dataset
         """
-        from datasets.GD.loading_data import loading_data
-
+        from datasets.GD.loading_data import loading_data    
+                
         self.net.eval()
 
         # losses = AverageMeter()
@@ -394,7 +398,7 @@ class Trainer():
 
         # self.writer.add_scalar('val_loss_golden', loss, self.epoch + 1)
         self.writer.add_scalar('mae_golden', mae, self.epoch + 1)
-        self.writer.add_scalar('rmse_golden', mse, self.epoch + 1)
+        self.writer.add_scalar('mse_golden', mse, self.epoch + 1)
         self.writer.add_scalar('mgape_golden', mgape, self.epoch + 1)
 
         self.train_record_golden['best_mae'] = mae.item()
@@ -413,3 +417,4 @@ class Trainer():
         # self.i_tb,self.exp_path,self.exp_name,[mae, mse, 0, loss],self.train_record_golden, None)
 
         print_summary(self.exp_name + "-Golden", [mae, mse, mgape, loss], self.train_record_golden)
+
