@@ -175,14 +175,8 @@ class Trainer():
         self.writer.add_scalar('rmse', mse, self.epoch + 1)
         self.writer.add_scalar('mgape', mgape, self.epoch + 1)
 
-        best_metric = 'best_mae'
-        metric = mae
-        if best_metric == 'best_mse':
-            metric = mse
-        elif best_metric == 'best_mgape':
-            metric = mgape
-
-        if metric < self.train_record[best_metric]:
+        best_model = False
+        if mae < self.train_record['best_mae']:
             self.train_record, best_model = update_model(self.net, self.optimizer, self.scheduler, self.epoch,
                                                          self.i_tb, self.exp_path,
                                                          self.exp_name,
@@ -377,16 +371,9 @@ class Trainer():
                     mses.update((gt_count - pred_cnt) * (gt_count - pred_cnt))
 
                     metric_grid = (4, 4)
-                    print('pred_map:', pred_map[i_img].squeeze())
-                    print('gt_count:', gt_count[i_img])
-                    print('img.shape:', img.shape)
                     width = img.shape[3]
                     height = img.shape[2]
-                    print('width:', width)
-                    print('height:', height)
-                    print('gt_points:', type(gt_points), gt_points)
-                    ground_truth = [{'x': point['x'].item(), 'y': point['y'].item()} for point in gt_points]
-                    print('ground_truth:', type(ground_truth), ground_truth)
+                    ground_truth = [(point['x'].item(), point['y'].item()) for point in gt_points]
 
                     gape, gcae = get_grid_metrics_with_points(width, height,
                                                               pred_map[i_img].squeeze() / self.cfg.LOG_PARA,

@@ -441,6 +441,10 @@ def get_grid_metrics_with_points(width, height, density_map, ground_truth, metri
 
     n_w = int(math.ceil(width / metric_grid[0]))
     n_h = int(math.ceil(height / metric_grid[1]))
+    if debug:
+        print('n_w:',type(n_w), n_w)
+        print('n_h:',type(n_h), n_h)
+        
     for iw in range(metric_grid[0]):
 
         x_start = iw * n_w
@@ -498,15 +502,35 @@ def get_grid_metrics_with_points(width, height, density_map, ground_truth, metri
                       y_stop)
                 print("sub_density_map(sum):", sub_density_map.sum())
 
+    if debug:
+        print('matrix_density_map:',matrix_density_map)
+        print('matrix_points:',matrix_points)
+        
     matrix_difference = matrix_density_map - matrix_points
-
+    
+    if debug:
+        print('matrix_difference:',matrix_difference)
+        
     matrix_final = matrix_difference.round()
     matrix_final = np.absolute(matrix_final)
 
-    # grid absolute percentage error
-    matrix_points_sum = matrix_points.sum()
-    if matrix_points_sum == 0:
-        matrix_points_sum = 1
-    gape = matrix_final.sum() / matrix_points_sum
-
-    return gape, matrix_points, matrix_density_map, matrix_difference, matrix_final
+    if debug:
+        print('matrix_final:',matrix_final)
+        
+    gt_nb_person = len(ground_truth)
+    if gt_nb_person==0:
+        gt_nb_person=1
+    if debug:
+        print('gt_nb_person:',gt_nb_person)
+        
+    #grid absolute percentage error
+    gape = 100.*matrix_final.sum()/gt_nb_person
+    if debug:
+        print('gape:',gape)
+        
+    #grid cell absolute error
+    gcae = (matrix_final.sum()/metric_grid[0]/metric_grid[1]).round()
+    if debug:
+        print('gcae:',gcae)
+        
+    return gape, gcae
