@@ -36,7 +36,6 @@ __C_DYN.PATH_SETTINGS = {
                          'CC__index_filepath' : '/workspace/cclabeler/users/background.json'
                         }
 
-
 #- GCC : 
 #    - GCC__gt_folder
 #    - GCC__index_folder

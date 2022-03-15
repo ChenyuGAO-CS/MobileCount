@@ -4,6 +4,7 @@ import os
 import json
 import numpy as np
 import pathlib
+import logging as lg
 from PIL import Image
 from .dynamics import CustomDataset
 
@@ -41,10 +42,15 @@ class CustomCCLabeler(CustomDataset):
         
         json_data = {}
         for n, im in enumerate(list_data):
-            json_data[n] = {"path_img": os.path.join(self.folder, 'images',  im),
-                           "path_gt":  os.path.join(self.folder, 'jsons',  im + ".json"),
-                           "gt_count": None,
-                           "folder": self.folder}
+            image_path = os.path.join(self.folder, 'images',  im)
+            try:
+                img = Image.open(image_path)
+                json_data[m] = {"path_img": image_path,
+                               "path_gt":  os.path.join(self.folder, 'jsons', im + ".json"),
+                               "gt_count": None,
+                               "folder": self.folder}
+            except Exception as e:
+                lg.warning(f'Cannot read image: {image_path}, error: {str(e)}')
         df = pd.DataFrame.from_dict(json_data, orient='index')
         return df
     
@@ -59,7 +65,10 @@ class CustomCCLabeler(CustomDataset):
 
             ds = np.zeros(shape)
             for x, y in points:
-                ds[x, y] += 1
+                try:
+                    ds[x, y] += 1
+                except Exception as e:
+                    lg.warning('Point outside of the image point')
             den = ds.astype('uint8').T
             return den
             # if we want return PIL: Image.fromarray(den)
