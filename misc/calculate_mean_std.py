@@ -35,6 +35,7 @@ tests_dictionary = {
              "RECALCULATE": True
              },
     "GCC": {"LIST_C_DATASETS": [(CustomGCC, '/workspace/data/GCC')],
+            "PATH_SETTINGS": {'GCC__gt_folder': '/workspace/home/gameiroth/data/GCC/density/maps_adaptive_kernel/'},
             "VAL_BATCH_SIZE": 1,
             "MEAN_STD_REFERENCE": (
                 [0.302234709263, 0.291243076324, 0.269087553024], [0.227743327618, 0.211051672697, 0.184846073389]),
@@ -46,14 +47,43 @@ tests_dictionary = {
                    "MEAN_STD_REFERENCE": ([0.45974886, 0.46210667, 0.46128407], [0.2600742, 0.2610275, 0.28212664]),
                    "RECALCULATE": True
                    },
+    "SHHA+BACKGROUND": {"LIST_C_DATASETS": [(CustomSHH, '/workspace/data/shanghaiTech/part_A_final/'),
+                                            (CustomCCLabeler, '/workspace/cclabeler/')],
+                                 "PATH_SETTINGS": {'CC__index_filepath': '/workspace/cclabeler/users/background.json'},
+                                 "VAL_BATCH_SIZE": 1,
+                                 "MEAN_STD_REFERENCE": ([1., 1., 1.], [1., 1., 1.]),
+                                 "RECALCULATE": True
+                                 },
+    "SHHB+BACKGROUND": {"LIST_C_DATASETS": [(CustomSHH, '/workspace/data/shanghaiTech/part_B_final/'),
+                                            (CustomCCLabeler, '/workspace/cclabeler/')],
+                                 "PATH_SETTINGS": {'CC__index_filepath': '/workspace/cclabeler/users/background.json'},
+                                 "VAL_BATCH_SIZE": 1,
+                                 "MEAN_STD_REFERENCE":  ([1., 1., 1.], [1., 1., 1.]),
+                                 "RECALCULATE": True
+                                 },
+    "SHHA+SHHB+BACKGROUND": {"LIST_C_DATASETS": [(CustomSHH, '/workspace/data/shanghaiTech/part_A_final/'),
+                                                 (CustomSHH, '/workspace/data/shanghaiTech/part_B_final/'),
+                                                 (CustomCCLabeler, '/workspace/cclabeler/')],
+                                 "PATH_SETTINGS": {'CC__index_filepath': '/workspace/cclabeler/users/background.json'},
+                                 "VAL_BATCH_SIZE": 1,
+                                 "MEAN_STD_REFERENCE": ([1., 1., 1.], [1., 1., 1.]),
+                                 "RECALCULATE": True
+                                 },
+    "SHHA+SHHB": {"LIST_C_DATASETS": [(CustomSHH, '/workspace/data/shanghaiTech/part_A_final/'),
+                                      (CustomSHH, '/workspace/data/shanghaiTech/part_B_final/')],
+                                 "PATH_SETTINGS": {'CC__index_filepath': '/workspace/cclabeler/users/background.json'},
+                                 "VAL_BATCH_SIZE": 1,
+                                 "MEAN_STD_REFERENCE":  ([1., 1., 1.], [1., 1., 1.]),
+                                 "RECALCULATE": True
+                                 },
     "SHHA+SHHB+GCC+BACKGROUND": {"LIST_C_DATASETS": [(CustomSHH, '/workspace/data/shanghaiTech/part_A_final/'),
                                                      (CustomSHH, '/workspace/data/shanghaiTech/part_B_final/'),
                                                      (CustomGCC, '/workspace/data/GCC'),
                                                      (CustomCCLabeler, '/workspace/cclabeler/')],
-                                 "PATH_SETTINGS": {'CC__index_filepath': '/workspace/cclabeler/users/background.json'},
+                                 "PATH_SETTINGS": {'CC__index_filepath': '/workspace/cclabeler/users/background.json',
+                                                  'GCC__gt_folder': '/workspace/home/gameiroth/data/GCC/density/maps_adaptive_kernel/'},
                                  "VAL_BATCH_SIZE": 1,
-                                 "MEAN_STD_REFERENCE": (
-                                     [0.32202065, 0.311729, 0.29429936], [0.23350027, 0.21823275, 0.19834095]),
+                                 "MEAN_STD_REFERENCE":  ([1., 1., 1.], [1., 1., 1.]),
                                  "RECALCULATE": True
                                  },
 }
