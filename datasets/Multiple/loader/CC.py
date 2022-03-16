@@ -1,13 +1,12 @@
 import pandas as pd
-import glob
 import os
 import json
-import numpy as np
 import pathlib
+import numpy as np
 import logging as lg
 from PIL import Image
+from scipy.sparse import load_npz
 from .dynamics import CustomDataset
-
 
 
 class CustomCCLabeler(CustomDataset):
@@ -16,10 +15,12 @@ class CustomCCLabeler(CustomDataset):
         # like: '/workspace/cclabeler/users/golden.json' for Golden
         # or '/workspace/cclabeler/users/user4.json' or Background
         self.gt_index_filepath = kwargs.get('CC__index_filepath', None)
+        
         if self.gt_index_filepath is None:
             raise ValueError('Must specify `CC__index_filepath` parameter')
         
         if 'background' in self.gt_index_filepath:
+            self.gt_path = kwargs.get('BG__gt_path', None)
             self.gt_format = kwargs.get('BG__gt_format', '.json')
             self.transform = kwargs.get('BG__transform', None)
         elif 'golden' in self.gt_index_filepath:
@@ -27,7 +28,7 @@ class CustomCCLabeler(CustomDataset):
             self.gt_format = kwargs.get('GD__gt_format', '.json')
         else:
             raise NotImplementedError
-
+        
         self.folder = folder
         self.mode = mode
         
@@ -43,10 +44,16 @@ class CustomCCLabeler(CustomDataset):
         json_data = {}
         for n, im in enumerate(list_data):
             image_path = os.path.join(self.folder, 'images',  im)
+            
+            if self.gt_path is None:
+                path_gt = os.path.join(self.folder, 'jsons', im + ".json")
+            else:
+                path_gt = os.path.join(self.gt_path, pathlib.Path(im).stem + '.npz')
+            
             try:
                 img = Image.open(image_path)
                 json_data[n] = {"path_img": image_path,
-                               "path_gt":  os.path.join(self.folder, 'jsons', im + ".json"),
+                               "path_gt":  path_gt,
                                "gt_count": None,
                                "folder": self.folder}
             except Exception as e:
@@ -54,8 +61,8 @@ class CustomCCLabeler(CustomDataset):
         df = pd.DataFrame.from_dict(json_data, orient='index')
         return df
     
-    def load_gt(self, filename, is_density_map=False):
-        if not is_density_map:
+    def load_gt(self, filename):
+        if self.gt_path is None:
             with open(filename, 'r') as f:
                 js_gt = json.load(f)
                 property_img = js_gt['properties']
@@ -73,4 +80,4 @@ class CustomCCLabeler(CustomDataset):
             return den
             # if we want return PIL: Image.fromarray(den)
         else:
-            raise NotImplementedError
+            return load_npz(filename).toarray()

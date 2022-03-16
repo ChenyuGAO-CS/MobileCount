@@ -66,7 +66,6 @@ def loading_data():
                               image_size=cfg_data.IMAGE_SIZE,
                               **cfg_data.PATH_SETTINGS)
 
-    
     val_loader = DataLoader(val_set, 
                             batch_size=cfg_data.VAL_BATCH_SIZE, 
                             num_workers=8, 
