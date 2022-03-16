@@ -31,7 +31,7 @@ class CustomSHH(CustomDataset):
         """
         Read all images position in SSHB Dataset
         """
-        img_list = list(filter(lambda x: '.txt' not in x, 
+        img_list = list(filter(lambda x: '.txt' not in x and '.zip' not in x, 
                                glob.glob(os.path.join(self.folder, f'{self.mode}_data', 'images', '*'))))
         gt_folder = os.path.join(self.folder, f'{self.mode}_data', self.gt_name_folder)
         json_data = {}
