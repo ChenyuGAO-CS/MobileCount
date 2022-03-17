@@ -133,6 +133,10 @@ class CustomDataset:
     def __len__(self):
         return len(self.dataset)
     
+    def check_denssity_map(self, density_map):
+        sum_negative = (density_map<0).sum()
+        min_negative = (density_map<0).min()
+        return sum_negative,min_negative
 
 
 class CollateFN:

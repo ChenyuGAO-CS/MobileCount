@@ -2,6 +2,7 @@ import pandas as pd
 import glob
 import os
 import numpy as np
+import logging as lg
 import pathlib
 from scipy.sparse import load_npz
 from .dynamics import CustomDataset
@@ -39,4 +40,10 @@ class CustomGCC(CustomDataset):
         return df
     
     def load_gt(self, filename):
-        return load_npz(filename).toarray()
+        density_map = load_npz(filename).toarray()
+        sum_negative, min_negative = self.check_denssity_map(density_map):
+        if sum_negative<0.:
+            lg.warning('density map with negative values {} - sum : {} - min : {}'.format(filename, sum_negative, min_negative))
+            assert sum_negative==0.
+    
+        return density_map

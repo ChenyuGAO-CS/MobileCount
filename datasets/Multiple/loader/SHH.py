@@ -1,6 +1,7 @@
 import pandas as pd
 import glob
 import numpy as np
+import logging as lg
 import os
 import pathlib
 from scipy.sparse import load_npz
@@ -51,9 +52,16 @@ class CustomSHH(CustomDataset):
         """
         Load GT in np.array
         """
+        density_map = None
         if pathlib.Path(filename).suffix == '.npz':
-            return load_npz(filename).toarray()
-        if pathlib.Path(filename).suffix == '.h5':
+            density_map = load_npz(filename).toarray()
+        elif pathlib.Path(filename).suffix == '.h5':
             gt_file = h5py.File(filename)
-            den = np.asarray(gt_file['density'])
-            return den
+            density_map = np.asarray(gt_file['density'])
+            
+        sum_negative, min_negative = self.check_denssity_map(density_map):
+        if sum_negative<0.:
+            lg.warning('density map with negative values {} - sum : {} - min : {}'.format(filename, sum_negative, min_negative))
+            assert sum_negative==0.
+    
+        return density_map

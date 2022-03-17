@@ -62,6 +62,7 @@ class CustomCCLabeler(CustomDataset):
         return df
     
     def load_gt(self, filename):
+        density_map = None
         if self.gt_path is None:
             with open(filename, 'r') as f:
                 js_gt = json.load(f)
@@ -76,8 +77,14 @@ class CustomCCLabeler(CustomDataset):
                     ds[x, y] += 1
                 except Exception as e:
                     lg.warning('Point outside of the image point')
-            den = ds.astype('uint8').T
-            return den
+            density_map = ds.astype('uint8').T
             # if we want return PIL: Image.fromarray(den)
         else:
-            return load_npz(filename).toarray()
+            density_map = load_npz(filename).toarray()
+            
+        sum_negative, min_negative = self.check_denssity_map(density_map):
+        if sum_negative<0.:
+            lg.warning('density map with negative values {} - sum : {} - min : {}'.format(filename, sum_negative, min_negative))
+            assert sum_negative==0.
+    
+        return density_map

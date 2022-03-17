@@ -8,7 +8,7 @@ __C_DYN = edict()
 cfg_data = __C_DYN
 
 __C_DYN.IMAGE_SIZE = None
-__C_DYN.TRAIN_SIZE = (1000, 800)
+__C_DYN.TRAIN_SIZE = (576,768)
 __C_DYN.LIST_C_DATASETS = [#(CustomGCC, '/workspace/data/GCC'), 
                           #(CustomSHH, '/workspace/data/shanghaiTech/part_A_final/'), 
                           (CustomSHH, '/workspace/data/shanghaiTech/part_B_final/'),
@@ -42,7 +42,7 @@ __C_DYN.RANDOM_DOWNOVER_SAMPLING = -1
 __C_DYN.RANDOM_DOWN_SAMPLING = -1
 
 __C_DYN.RESUME_MODEL = '/data/models'
-__C_DYN.TRAIN_BATCH_SIZE = 4
+__C_DYN.TRAIN_BATCH_SIZE = 6
 __C_DYN.VAL_BATCH_SIZE = 1
 __C_DYN.PATH_SETTINGS = {
     #'GCC__gt_folder': '/workspace/home/gameiroth/data/GCC/density/maps_adaptive_kernel/',

@@ -90,6 +90,7 @@ class Trainer():
                     print('val golden time: {:.2f}s'.format(self.timer['val golden time'].diff))
 
     def train(self):  # training for all datasets
+        train_losses = AverageMeter()
         self.net.train()
         for i, data in enumerate(self.train_loader, 0):
             self.timer['iter time'].tic()
@@ -113,14 +114,18 @@ class Trainer():
 
             if (i + 1) % self.cfg.PRINT_FREQ == 0:
                 self.i_tb += 1
-                self.writer.add_scalar('train_loss', loss.item(), self.i_tb)
+                self.writer.add_scalar('train_loss_batch', loss.item(), self.i_tb)
                 self.timer['iter time'].toc(average=False)
                 print('[ep %d][it %d][loss %.4f][lc_loss %.4f][lr %.4f][%.2fs]' %
                       (self.epoch + 1, i + 1, loss.item(), lc_loss, self.optimizer.param_groups[0]['lr'] * 10000,
                        self.timer['iter time'].diff))
                 print('        [cnt: gt: %.1f pred: %.2f]' % (
                     gt_map[0].sum().data / self.cfg.LOG_PARA, pred_map[0].sum().data / self.cfg.LOG_PARA))
-
+                
+            train_losses.update(lc_loss, i)
+        train_loss = train_losses.avg 
+        self.writer.add_scalar('train_loss', train_loss, self.epoch + 1)
+            
     def validate_V1(self):
         """
         validate_V1 for SHHA, SHHB, UCF-QNRF, UCF50
