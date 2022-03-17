@@ -58,10 +58,6 @@ class CustomSHH(CustomDataset):
         elif pathlib.Path(filename).suffix == '.h5':
             gt_file = h5py.File(filename)
             density_map = np.asarray(gt_file['density'])
-            
-        sum_negative, min_negative = self.check_denssity_map(density_map):
-        if sum_negative<0.:
-            lg.warning('density map with negative values {} - sum : {} - min : {}'.format(filename, sum_negative, min_negative))
-            assert sum_negative==0.
     
+        self.check_density_map(density_map)
         return density_map

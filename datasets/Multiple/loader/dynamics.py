@@ -1,6 +1,7 @@
 import torch
 import numpy as np
 import pandas as pd
+import logging as lg
 from torch.utils.data import Dataset
 from PIL import Image
 import random
@@ -133,10 +134,12 @@ class CustomDataset:
     def __len__(self):
         return len(self.dataset)
     
-    def check_denssity_map(self, density_map):
-        sum_negative = (density_map<0).sum()
-        min_negative = (density_map<0).min()
-        return sum_negative,min_negative
+    def check_density_map(self, density_map):
+        sum_negative = (density_map < 0).sum()
+        min_negative = (density_map < 0).min()
+        if sum_negative < 0.:
+            lg.warning(f'density map with negative values {filename} - sum : {sum_negative} - min : {min_negative}')
+            assert sum_negative == 0.        
 
 
 class CollateFN:

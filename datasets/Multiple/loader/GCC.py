@@ -41,9 +41,5 @@ class CustomGCC(CustomDataset):
     
     def load_gt(self, filename):
         density_map = load_npz(filename).toarray()
-        sum_negative, min_negative = self.check_denssity_map(density_map):
-        if sum_negative<0.:
-            lg.warning('density map with negative values {} - sum : {} - min : {}'.format(filename, sum_negative, min_negative))
-            assert sum_negative==0.
-    
+        self.check_density_map(density_map)
         return density_map
