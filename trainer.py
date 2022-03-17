@@ -122,7 +122,7 @@ class Trainer():
                 print('        [cnt: gt: %.1f pred: %.2f]' % (
                     gt_map[0].sum().data / self.cfg.LOG_PARA, pred_map[0].sum().data / self.cfg.LOG_PARA))
                 
-            train_losses.update(lc_loss, i)
+            train_losses.update(loss)
         train_loss = train_losses.avg 
         self.writer.add_scalar('train_loss', train_loss, self.epoch + 1)
             
