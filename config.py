@@ -9,7 +9,7 @@ cfg = __C
 
 #------------------------------TRAIN------------------------
 __C.SEED = 3035 # random seed,  for reporduction
-__C.DATASET = 'SHHB' # dataset selection: SHHA, SHHB, UCF50, QNRF, WE, Multiple
+__C.DATASET = 'Multiple' # dataset selection: SHHA, SHHB, UCF50, QNRF, WE, Multiple
 
 if __C.DATASET == 'UCF50':# only for UCF50
 	from datasets.UCF50.setting import cfg_data
@@ -73,7 +73,7 @@ __C.INFER_GOLDEN_DATASET = True
 __C.L1_LOSS_REDUCTION = "mean"
 
 # Custom LOSS
-__C.CUSTOM_LOSS = True
+__C.CUSTOM_LOSS = False
 __C.CUSTOM_LOSS_LAMBDA = 10
 __C.CUSTOM_LOSS_SIZES = (2, 4)
 

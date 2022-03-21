@@ -215,7 +215,7 @@ def update_model(net,optimizer,scheduler,epoch,i_tb,exp_path,exp_name,scores,tra
     mae, mse, mgape, loss = scores
 
     snapshot_name = 'all_ep_%d_mae_%.1f_rmse_%.1f_mgape_%.1f' % (epoch + 1, mae, mse, mgape)
-    
+    best_model = False
     metric = mae
     #TODO a adapter pour changer de comparaison de metrique
     if metric < train_record[best_metric]:
@@ -229,6 +229,7 @@ def update_model(net,optimizer,scheduler,epoch,i_tb,exp_path,exp_name,scores,tra
         if log_file is not None:
             logger_txt(log_file,epoch,scores)
         #to_saved_weight = net.state_dict()
+        best_model = True
         torch.save(best_state, os.path.join(exp_path, exp_name, 'best_state.pth'))
         
     latest_state = {'train_record':train_record, 'net':net.state_dict(), 'optimizer':optimizer.state_dict(),\
@@ -237,7 +238,7 @@ def update_model(net,optimizer,scheduler,epoch,i_tb,exp_path,exp_name,scores,tra
 
     torch.save(latest_state,os.path.join(exp_path, exp_name, 'latest_state.pth'))
 
-    return train_record
+    return train_record, best_model
 
 
 def copy_cur_env(work_dir, dst_dir, exception):
@@ -435,3 +436,101 @@ def get_grid_metrics(prediction_map, ground_truth_map, metric_grid, debug=False)
     return gape, gcae
 
 
+def get_grid_metrics_with_points(width, height, density_map, ground_truth, metric_grid, debug=False):
+    matrix_points = np.zeros(metric_grid)
+
+    n_w = int(math.ceil(width / metric_grid[0]))
+    n_h = int(math.ceil(height / metric_grid[1]))
+    if debug:
+        print('n_w:',type(n_w), n_w)
+        print('n_h:',type(n_h), n_h)
+        
+    for iw in range(metric_grid[0]):
+
+        x_start = iw * n_w
+        x_stop = (iw + 1) * n_w
+        if x_stop > width:
+            x_stop = width
+
+        for ih in range(metric_grid[1]):
+
+            y_start = ih * n_h
+            y_stop = (ih + 1) * n_h
+            if y_stop > height:
+                y_stop = height
+
+            nb_points = 0
+            for (xx, yy) in ground_truth:
+                if xx >= x_start and xx < x_stop and yy >= y_start and yy < y_stop:
+                    if debug:
+                        print("point:", xx, yy)
+                    nb_points += 1
+            matrix_points[iw, ih] = nb_points
+            if debug:
+                print('iw:', iw, 'x_start:', x_start, 'x_stop:', x_stop, 'ih:', ih, 'y_start:', y_start, 'y_stop:',
+                      y_stop)
+                print("nb_points:", nb_points)
+
+    matrix_density_map = np.zeros(metric_grid)
+
+    dm_width = density_map.shape[1]
+    dm_height = density_map.shape[0]
+    if debug:
+        print('dm_width:', dm_width)
+        print('dm_height:', dm_height)
+
+    n_w = int(math.ceil(dm_width / metric_grid[0]))
+    n_h = int(math.ceil(dm_height / metric_grid[1]))
+    for iw in range(metric_grid[0]):
+
+        x_start = iw * n_w
+        x_stop = (iw + 1) * n_w
+        if x_stop > dm_width:
+            x_stop = dm_width
+
+        for ih in range(metric_grid[1]):
+
+            y_start = ih * n_h
+            y_stop = (ih + 1) * n_h
+            if y_stop > dm_height:
+                y_stop = dm_height
+
+            sub_density_map = density_map[y_start:y_stop, x_start:x_stop]
+            matrix_density_map[iw, ih] = sub_density_map.sum()
+            if debug:
+                print('iw:', iw, 'x_start:', x_start, 'x_stop:', x_stop, 'ih:', ih, 'y_start:', y_start, 'y_stop:',
+                      y_stop)
+                print("sub_density_map(sum):", sub_density_map.sum())
+
+    if debug:
+        print('matrix_density_map:',matrix_density_map)
+        print('matrix_points:',matrix_points)
+        
+    matrix_difference = matrix_density_map - matrix_points
+    
+    if debug:
+        print('matrix_difference:',matrix_difference)
+        
+    matrix_final = matrix_difference.round()
+    matrix_final = np.absolute(matrix_final)
+
+    if debug:
+        print('matrix_final:',matrix_final)
+        
+    gt_nb_person = len(ground_truth)
+    if gt_nb_person==0:
+        gt_nb_person=1
+    if debug:
+        print('gt_nb_person:',gt_nb_person)
+        
+    #grid absolute percentage error
+    gape = 100.*matrix_final.sum()/gt_nb_person
+    if debug:
+        print('gape:',gape)
+        
+    #grid cell absolute error
+    gcae = (matrix_final.sum()/metric_grid[0]/metric_grid[1]).round()
+    if debug:
+        print('gcae:',gcae)
+        
+    return gape, gcae

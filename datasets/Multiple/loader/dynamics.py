@@ -1,16 +1,10 @@
 import torch
 import numpy as np
 import pandas as pd
-import os
-import pathlib
+import logging as lg
 from torch.utils.data import Dataset
 from PIL import Image
-from scipy import io as sio
-from torch.utils import data
-from scipy.sparse import load_npz
-import glob 
 import random
-
 
 class DynamicDataset(Dataset):
     def __init__(self,
@@ -138,6 +132,12 @@ class CustomDataset:
     def __len__(self):
         return len(self.dataset)
     
+    def check_density_map(self, density_map):
+        sum_negative = (density_map < 0).sum()
+        min_negative = (density_map < 0).min()
+        if sum_negative < 0.:
+            lg.warning(f'density map with negative values {filename} - sum : {sum_negative} - min : {min_negative}')
+            assert sum_negative == 0.        
 
 
 class CollateFN:

@@ -30,11 +30,11 @@ class GD(data.Dataset):
     
     def __getitem__(self, index):
         fname = self.data_files[index]
-        img, den = self.read_image_and_gt(fname)
+        img, den, points = self.read_image_and_gt(fname)
         if self.img_transform is not None:
             img = self.img_transform(img)         
           
-        return img, den
+        return img, den, points
 
     def __len__(self):
         return self.num_samples
@@ -51,8 +51,9 @@ class GD(data.Dataset):
         with open(os.path.join(self.json_path,fname + '.json')) as f:
                     js = json.load(f)
                     count = js['human_num']
+                    points = js['points']
         
-        return img, count    
+        return img, count, points
 
     def get_num_samples(self):
         return self.num_samples       

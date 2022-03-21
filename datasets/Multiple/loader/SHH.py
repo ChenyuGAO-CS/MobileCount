@@ -1,6 +1,7 @@
 import pandas as pd
 import glob
 import numpy as np
+import logging as lg
 import os
 import pathlib
 from scipy.sparse import load_npz
@@ -31,7 +32,7 @@ class CustomSHH(CustomDataset):
         """
         Read all images position in SSHB Dataset
         """
-        img_list = list(filter(lambda x: '.txt' not in x, 
+        img_list = list(filter(lambda x: '.txt' not in x and '.zip' not in x, 
                                glob.glob(os.path.join(self.folder, f'{self.mode}_data', 'images', '*'))))
         gt_folder = os.path.join(self.folder, f'{self.mode}_data', self.gt_name_folder)
         json_data = {}
@@ -51,9 +52,12 @@ class CustomSHH(CustomDataset):
         """
         Load GT in np.array
         """
+        density_map = None
         if pathlib.Path(filename).suffix == '.npz':
-            return load_npz(filename).toarray()
-        if pathlib.Path(filename).suffix == '.h5':
+            density_map = load_npz(filename).toarray()
+        elif pathlib.Path(filename).suffix == '.h5':
             gt_file = h5py.File(filename)
-            den = np.asarray(gt_file['density'])
-            return den
+            density_map = np.asarray(gt_file['density'])
+    
+        self.check_density_map(density_map)
+        return density_map

@@ -17,14 +17,14 @@ def loading_data():
     # add here specific func : 
     # choose differents combinaison of transformations for each dataset
     
-    train_main_transform_SHHA = own_transforms.Compose([
+    train_main_transform_SHHB = own_transforms.Compose([
         own_transforms.RandomDownOverSampling(cfg_data.RANDOM_DOWNOVER_SAMPLING),
         own_transforms.RandomDownSampling(cfg_data.RANDOM_DOWN_SAMPLING),
         own_transforms.RandomCrop(cfg_data.TRAIN_SIZE),
         own_transforms.RandomHorizontallyFlip()
     ])
     
-    specific_transform = {"SHHA__transform" : train_main_transform_SHHA }
+    specific_transform = {"SHHB__transform" : train_main_transform_SHHB }
     
     if specific_transform:
         cfg_data.PATH_SETTINGS.update(specific_transform)
@@ -66,7 +66,6 @@ def loading_data():
                               image_size=cfg_data.IMAGE_SIZE,
                               **cfg_data.PATH_SETTINGS)
 
-    
     val_loader = DataLoader(val_set, 
                             batch_size=cfg_data.VAL_BATCH_SIZE, 
                             num_workers=8, 

@@ -2,6 +2,7 @@ import pandas as pd
 import glob
 import os
 import numpy as np
+import logging as lg
 import pathlib
 from scipy.sparse import load_npz
 from .dynamics import CustomDataset
@@ -39,4 +40,6 @@ class CustomGCC(CustomDataset):
         return df
     
     def load_gt(self, filename):
-        return load_npz(filename).toarray()
+        density_map = load_npz(filename).toarray()
+        self.check_density_map(density_map)
+        return density_map
