@@ -70,20 +70,18 @@ class DynamicDataset(Dataset):
         if self.image_size is not None:
             img, den = self.resize(img), self.resize(den)
         # specific dataset transform in img and den
-        with_main = True
-        if dataset_func['transform'] is not None:
-            # skip main if specific transform is used
-            img, den = dataset_func['transform'](img, den)
-            with_main = False
-        img, den = self.transform_img(img, den, with_main=with_main)
+        specific_func = dataset_func['transform']
+        img, den = self.transform_img(img, den, specific=specific_func)
         return img, den
     
-    def transform_img(self, img, den, with_main=True):
-        if with_main:
-            if self.main_transform is not None:
-                img, den = self.main_transform(img, den) 
+    def transform_img(self, img, den, specific=None):
+        if self.main_transform is not None:
+            if specific is not None:
+                img, den = specific(img, den)
+            else:
+                img, den = self.main_transform(img, den)
         if self.img_transform is not None:
-            img = self.img_transform(img)         
+            img = self.img_transform(img)
         if self.gt_transform is not None:
             den = self.gt_transform(den)
         return img, den
