@@ -95,7 +95,7 @@ class Trainer:
 
                 if best_model and self.cfg.INFER_GOLDEN_DATASET:
                     self.timer['val golden time'].tic()
-                    self.validate_GD()
+                    self.validate_golden()
                     self.timer['val golden time'].toc(average=False)
                     print('val golden time: {:.2f}s'.format(self.timer['val golden time'].diff))
 
@@ -364,15 +364,14 @@ class Trainer:
 
         return False
 
-    def validate_GD(self):
+    def validate_golden(self):
         """
-        validate_GD Validate for golden dataset
+        validate_golden Validate for golden dataset
         """
         from datasets.GD.loading_data import loading_data
 
         self.net.eval()
 
-        # losses = AverageMeter()
         maes = AverageMeter()
         mapes = AverageMeter()
         mses = AverageMeter()
@@ -399,9 +398,7 @@ class Trainer:
 
                 for i_img in range(pred_map.shape[0]):
                     pred_cnt = np.sum(pred_map[i_img]) / self.cfg.LOG_PARA
-                    # gt_count = np.sum(gt_map[i_img])/self.cfg_data.LOG_PARA
 
-                    # losses.update(self.net.loss.item())
                     maes.update(abs(gt_count - pred_cnt))
                     if gt_count == 0.:
                         ape = 100. * abs(gt_count - pred_cnt)
@@ -423,18 +420,14 @@ class Trainer:
                     mgapes.update(gape)
                     mgcaes.update(gcae)
 
-                # if vi==0:
-                #    vis_results(self.exp_name, self.epoch, self.writer, self.restore_transform, img, pred_map, gt_map)
 
         mae = maes.avg
         mape = mapes.avg
         mse = np.sqrt(mses.avg)
         loss = 0
-        # loss = losses.avg
         mgape = mgapes.avg
         mgcae = mgcaes.avg
 
-        # self.writer.add_scalar('val_loss_golden', loss, self.epoch + 1)
         self.writer.add_scalar('mae_golden', mae, self.epoch + 1)
         self.writer.add_scalar('mape_golden', mape, self.epoch + 1)
         self.writer.add_scalar('rmse_golden', mse, self.epoch + 1)
@@ -447,7 +440,7 @@ class Trainer:
         self.train_record_golden['best_mgape'] = mgape.item()
         self.train_record_golden['best_mgcae'] = mgcae.item()
 
-        tr = self.train_record
+        tr = self.train_record_golden
         table_golden = f"""
 ### Table des métriques Golden
 | **Best MAE** | **Best MAPE** | **Best RMSE** | **Best MGAPE** | **Best MGCAE** |
@@ -456,8 +449,5 @@ class Trainer:
 """
 
         self.writer.add_text("validation_golden", table_golden, global_step=self.epoch + 1)
-
-        # self.train_record_golden = update_model(self.net,self.optimizer,self.scheduler,self.epoch,
-        # self.i_tb,self.exp_path,self.exp_name,[mae, mse, 0, loss],self.train_record_golden, None)
 
         print_summary(self.exp_name + "-Golden", [mae, mape, mse, mgape, mgcae, loss], self.train_record_golden)
