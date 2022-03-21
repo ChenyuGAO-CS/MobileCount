@@ -103,17 +103,17 @@ def logger_for_CMTL(exp_path, exp_name, work_dir, exception, resume=False):
 
 def logger_txt(log_file,epoch,scores):
 
-    mae, mse, mgape, loss = scores
+    mae, mape, mse, mgape, mgcae, loss = scores
 
     snapshot_name = 'all_ep_%d_mae_%.1f_rmse_%.1f_mgape_%.1f' % (epoch + 1, mae, mse, mgape)
 
     # pdb.set_trace()
 
     with open(log_file, 'a') as f:
-        f.write('='*15 + '+'*15 + '='*15 + '\n\n')
+        f.write('='*30 + '+'*30 + '='*30 + '\n\n')
         f.write(snapshot_name + '\n')
-        f.write('    [mae %.2f rmse %.2f mgape %.2f], [val loss %.4f]\n' % (mae, mse, mgape, loss))
-        f.write('='*15 + '+'*15 + '='*15 + '\n\n')    
+        f.write('    [mae %.2f mape %.2f rmse %.2f mgape %.2f mgcae %.2f], [val loss %.4f]\n' % (mae, mape, mse, mgape, mgcae, loss))
+        f.write('='*30 + '+'*30 + '='*30 + '\n\n')    
 
 
 
@@ -141,20 +141,22 @@ def vis_results(exp_name, epoch, writer, restore, img, pred_map, gt_map):
 
 
 def print_summary(exp_name,scores,train_record):
-    mae, mse, mgape, loss = scores
-    print( '='*100 )
+    mae, mape, mse, mgape, mgcae, loss = scores
+    print( '='*150 )
     print( exp_name )
-    print( '    '+ '-'*60 )
-    print( '    [mae %.2f rmse %.2f mgape %.2f], [val loss %.4f]' % (mae, mse, mgape, loss) )        
-    print( '    '+ '-'*60 )
-    print( '[best] [model: %s] , [mae %.2f], [rmse %.2f], [mgape %.2f]' % (train_record['best_model_name'],\
-                                                        train_record['best_mae'],\
-                                                        train_record['best_mse'],\
-                                                        train_record['best_mgape']) )
-    print( '='*100)
+    print( '    '+ '-'*75 )
+    print( '    [mae %.2f mape %.2f rmse %.2f mgape %.2f mgcae %.2f], [val loss %.4f]' % (mae, mape, mse, mgape, mgcae, loss) )        
+    print( '    '+ '-'*75 )
+    print( '[best] [model: %s] , [mae %.2f], [mape %.2f], [rmse %.2f], [mgape %.2f], [mgcae %.2f]' % (train_record['best_model_name'],
+                                                        train_record['best_mae'],
+                                                        train_record['best_mape'],
+                                                        train_record['best_mse'],
+                                                        train_record['best_mgape'],
+                                                        train_record['best_mgcae']) )
+    print( '='*150)
 
 def print_WE_summary(log_txt,epoch,scores,train_record,c_maes):
-    mae, mse, mgape, loss = scores
+    mae, mape, mse, mgape, mgcae, loss = scores
     # pdb.set_trace()
     with open(log_txt, 'a') as f:
         f.write('='*15 + '+'*15 + '='*15 + '\n')
@@ -177,7 +179,7 @@ def print_WE_summary(log_txt,epoch,scores,train_record,c_maes):
 
 
 def print_GCC_summary(log_txt,epoch, scores,train_record,c_maes,c_mses):
-    mae, mse, mgape, loss = scores
+    mae, mape, mse, mgape, mgcae, loss = scores
     #c_mses['level'] = np.sqrt(c_mses['level'].avg)
     #c_mses['time'] = np.sqrt(c_mses['time'].avg)
     #c_mses['weather'] = np.sqrt(c_mses['weather'].avg)
@@ -212,7 +214,7 @@ def print_GCC_summary(log_txt,epoch, scores,train_record,c_maes,c_mses):
 
 def update_model(net,optimizer,scheduler,epoch,i_tb,exp_path,exp_name,scores,train_record,log_file=None, best_metric='best_mae'):
 
-    mae, mse, mgape, loss = scores
+    mae, mape, mse, mgape, mgcae, loss = scores
 
     snapshot_name = 'all_ep_%d_mae_%.1f_rmse_%.1f_mgape_%.1f' % (epoch + 1, mae, mse, mgape)
     best_model = False
@@ -224,8 +226,10 @@ def update_model(net,optimizer,scheduler,epoch,i_tb,exp_path,exp_name,scores,tra
                 'exp_name':exp_name}
         train_record['best_model_name'] = snapshot_name
         train_record['best_mae'] = mae
-        train_record['best_mse'] = mse 
-        train_record['best_mgape'] = mgape         
+        train_record['best_mape'] = mape
+        train_record['best_mse'] = mse
+        train_record['best_mgape'] = mgape
+        train_record['best_mgcae'] = mgcae
         if log_file is not None:
             logger_txt(log_file,epoch,scores)
         #to_saved_weight = net.state_dict()

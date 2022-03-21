@@ -26,8 +26,8 @@ class Trainer():
         # self.optimizer = optim.SGD(self.net.parameters(), cfg.LR, momentum=0.95,weight_decay=5e-4)
         self.scheduler = StepLR(self.optimizer, step_size=cfg.NUM_EPOCH_LR_DECAY, gamma=cfg.LR_DECAY)
 
-        self.train_record = {'best_mae': 1e20, 'best_mse': 1e20, 'best_mgape': 1e20, 'best_model_name': ''}
-        self.train_record_golden = {'best_mae': 1e20, 'best_mse': 1e20, 'best_mgape': 1e20, 'best_model_name': ''}
+        self.train_record = {'best_mae': 1e20, 'best_mape': 1e20, 'best_mse': 1e20, 'best_mgape': 1e20, 'best_mgcae': 1e20, 'best_model_name': ''}
+        self.train_record_golden = {'best_mae': 1e20, 'best_mape': 1e20, 'best_mse': 1e20, 'best_mgape': 1e20, 'best_mgcae': 1e20, 'best_model_name': ''}
 
         self.timer = {'iter time': Timer(), 'train time': Timer(), 'val time': Timer(), 'val golden time': Timer()}
 
@@ -134,8 +134,10 @@ class Trainer():
 
         losses = AverageMeter()
         maes = AverageMeter()
+        mapes = AverageMeter()
         mses = AverageMeter()
         mgapes = AverageMeter()
+        mgcaes = AverageMeter()
 
         for vi, data in enumerate(self.val_loader, 0):
             img, gt_map = data
@@ -161,6 +163,11 @@ class Trainer():
 
                     losses.update(self.net.loss.item())
                     maes.update(abs(gt_count - pred_cnt))
+                    if gt_count==0.:
+                        ape = 100.*abs(gt_count - pred_cnt)
+                    else:
+                        ape = 100.*abs(gt_count - pred_cnt)/gt_count
+                    mapes.update(ape)
                     mses.update((gt_count - pred_cnt) * (gt_count - pred_cnt))
 
                     metric_grid = (4, 4)
@@ -169,37 +176,42 @@ class Trainer():
                                                   metric_grid,
                                                   debug=False)
                     mgapes.update(gape)
-
+                    mgcaes.update(gcae)
+                    
                 if vi == -1:  # -1
                     vis_results(self.exp_name, self.epoch, self.writer, self.restore_transform, img, pred_map, gt_map)
 
         mae = maes.avg
+        mape = mapes.avg
         mse = np.sqrt(mses.avg)
         loss = losses.avg
         mgape = mgapes.avg
-
+        mgcae = mgcaes.avg
+        
         self.writer.add_scalar('val_loss', loss, self.epoch + 1)
         self.writer.add_scalar('mae', mae, self.epoch + 1)
+        self.writer.add_scalar('mape', mape, self.epoch + 1)
         self.writer.add_scalar('rmse', mse, self.epoch + 1)
         self.writer.add_scalar('mgape', mgape, self.epoch + 1)
-
+        self.writer.add_scalar('mgcae', mgcae, self.epoch + 1)
+        
         best_model = False
         best_metric = 'best_mae'
         if mae < self.train_record[best_metric]:
             self.train_record, best_model = update_model(self.net, self.optimizer, self.scheduler, self.epoch,
                                                          self.i_tb, self.exp_path,
                                                          self.exp_name,
-                                                         [mae, mse, mgape, loss], self.train_record, self.log_txt,
+                                                         [mae, mape, mse, mgape, mgcae, loss], self.train_record, self.log_txt,
                                                          best_metric=best_metric)
             self.TABLE_VALID = f"""
 ### Table des métriques Validation
-| **Best MAE** | **Best RMSE** | **Best MGAPE** |
-| ---- | ---- | ---- |
-| {self.train_record['best_mae']} | {self.train_record['best_mse']} | {self.train_record['best_mgape']} | 
+| **Best MAE** | **Best MAPE** | **Best RMSE** | **Best MGAPE** | **Best MGCAE** |
+| ---- | ---- | ---- | ---- | ---- |
+| {self.train_record['best_mae']} | {self.train_record['best_mape']} | {self.train_record['best_mse']} | {self.train_record['best_mgape']} | {self.train_record['best_mgcae']} | 
 """
             self.writer.add_text("validation_table", self.TABLE_VALID, global_step=self.epoch + 1)
 
-        print_summary(self.exp_name, [mae, mse, mgape, loss], self.train_record)
+        print_summary(self.exp_name, [mae, mape, mse, mgape, mgcae, loss], self.train_record)
 
         return best_model
 
@@ -264,9 +276,9 @@ class Trainer():
 
         self.train_record = update_model(self.net, self.optimizer, self.scheduler, self.epoch, self.i_tb, self.exp_path,
                                          self.exp_name,
-                                         [mae, 0, 0, loss], self.train_record, self.log_txt)
+                                         [mae, 0, 0, 0, 0, loss], self.train_record, self.log_txt)
 
-        print_WE_summary(self.log_txt, self.epoch, [mae, 0, 0, loss], self.train_record, maes)
+        print_WE_summary(self.log_txt, self.epoch, [mae, 0, 0, 0, 0, loss], self.train_record, maes)
 
         return False
 
@@ -334,9 +346,9 @@ class Trainer():
 
         self.train_record_golden = update_model(self.net, self.optimizer, self.scheduler, self.epoch, self.i_tb,
                                                 self.exp_path, self.exp_name,
-                                                [mae, mse, 0, loss], self.train_record_golden, self.log_txt)
+                                                [mae, 0, mse, 0, 0, loss], self.train_record_golden, self.log_txt)
 
-        print_GCC_summary(self.log_txt, self.epoch, [mae, mse, 0, loss], self.train_record_golden, c_maes, c_mses)
+        print_GCC_summary(self.log_txt, self.epoch, [mae, 0, mse, 0, 0, loss], self.train_record_golden, c_maes, c_mses)
 
         return False
 
@@ -350,9 +362,11 @@ class Trainer():
 
         # losses = AverageMeter()
         maes = AverageMeter()
+        mapes = AverageMeter()
         mses = AverageMeter()
         mgapes = AverageMeter()
-
+        mgcaes = AverageMeter()
+        
         golden_val_loader = loading_data()
 
         for vi, data in enumerate(golden_val_loader, 0):
@@ -377,6 +391,11 @@ class Trainer():
 
                     # losses.update(self.net.loss.item())
                     maes.update(abs(gt_count - pred_cnt))
+                    if gt_count==0.:
+                        ape = 100.*abs(gt_count - pred_cnt)
+                    else:
+                        ape = 100.*abs(gt_count - pred_cnt)/gt_count
+                    mapes.update(ape)
                     mses.update((gt_count - pred_cnt) * (gt_count - pred_cnt))
 
                     metric_grid = (4, 4)
@@ -390,36 +409,43 @@ class Trainer():
                                                               metric_grid,
                                                               debug=False)
                     mgapes.update(gape)
+                    mgcaes.update(gcae)
 
                 # if vi==0:
                 #    vis_results(self.exp_name, self.epoch, self.writer, self.restore_transform, img, pred_map, gt_map)
 
         mae = maes.avg
+        mape = mapes.avg
         mse = np.sqrt(mses.avg)
         loss = 0
         # loss = losses.avg
-        mgape = 0
         mgape = mgapes.avg
-
+        mgcae = mgcaes.avg
+        
         # self.writer.add_scalar('val_loss_golden', loss, self.epoch + 1)
         self.writer.add_scalar('mae_golden', mae, self.epoch + 1)
-        self.writer.add_scalar('mse_golden', mse, self.epoch + 1)
+        self.writer.add_scalar('mape_golden', mape, self.epoch + 1)
+        self.writer.add_scalar('rmse_golden', mse, self.epoch + 1)
         self.writer.add_scalar('mgape_golden', mgape, self.epoch + 1)
-
+        self.writer.add_scalar('mgcae_golden', mgcae, self.epoch + 1)
+        
         self.train_record_golden['best_mae'] = mae.item()
+        self.train_record_golden['best_mape'] = mape.item()
         self.train_record_golden['best_mse'] = mse.item()
         self.train_record_golden['best_mgape'] = mgape.item()
-
+        self.train_record_golden['best_mgcae'] = mgcae.item()
+        
         self.TABLE_GOLDEN = f"""
 ### Table des métriques Golden
-| **Best MAE** | **Best RMSE** | **Best MGAPE** |
-| ---- | ---- | ---- |
-| {self.train_record_golden['best_mae']} | {self.train_record_golden['best_mse']} | {self.train_record_golden['best_mgape']} | 
+| **Best MAE** | **Best MAPE** | **Best RMSE** | **Best MGAPE** | **Best MGCAE** |
+| ---- | ---- | ---- | ---- | ---- |
+| {self.train_record['best_mae']} | {self.train_record['best_mape']} | {self.train_record['best_mse']} | {self.train_record['best_mgape']} | {self.train_record['best_mgcae']} | 
 """
+
         self.writer.add_text("validation_golden", self.TABLE_GOLDEN, global_step=self.epoch + 1)
 
         # self.train_record_golden = update_model(self.net,self.optimizer,self.scheduler,self.epoch,
         # self.i_tb,self.exp_path,self.exp_name,[mae, mse, 0, loss],self.train_record_golden, None)
 
-        print_summary(self.exp_name + "-Golden", [mae, mse, mgape, loss], self.train_record_golden)
+        print_summary(self.exp_name + "-Golden", [mae, mape, mse, mgape, mgcae, loss], self.train_record_golden)
 
