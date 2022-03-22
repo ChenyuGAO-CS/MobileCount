@@ -1,4 +1,5 @@
 import sys
+
 sys.path.append("../ia-foule-lab/")
 from torch import optim
 from torch.autograd import Variable
@@ -6,7 +7,9 @@ from torch.optim.lr_scheduler import StepLR
 
 from misc.utils import *
 from models.CC import CrowdCounter
-from iafoule.metrics import *
+
+from iafoule.metrics import get_metrics, get_metrics_with_points
+
 
 class Trainer:
     def __init__(self, dataloader, cfg, pwd):
@@ -87,11 +90,11 @@ class Trainer:
                 self.timer['val time'].tic()
                 best_model = False
                 if self.data_mode in ['SHHA', 'SHHB', 'QNRF', 'UCF50', 'Multiple']:
-                    best_model = self.validate_V1()
+                    best_model = self.validate_v1()
                 elif self.data_mode == 'WE':
-                    best_model = self.validate_V2()
+                    best_model = self.validate_v2()
                 elif self.data_mode == 'GCC':
-                    best_model = self.validate_V3()
+                    best_model = self.validate_v3()
                 self.timer['val time'].toc(average=False)
                 print('val time: {:.2f}s'.format(self.timer['val time'].diff))
 
@@ -138,7 +141,7 @@ class Trainer:
         train_loss = train_losses.avg
         self.writer.add_scalar('train_loss', train_loss, self.epoch + 1)
 
-    def validate_V1(self):
+    def validate_v1(self):
         """
         validate_V1 for SHHA, SHHB, UCF-QNRF, UCF50
         """
@@ -172,6 +175,11 @@ class Trainer:
                 for i_img in range(pred_map.shape[0]):
                     pred_cnt = np.sum(pred_map[i_img]) / self.cfg.LOG_PARA
                     gt_count = np.sum(gt_map[i_img]) / self.cfg.LOG_PARA
+
+                    metric_grids = [(4, 4)]
+                    metrics = get_metrics(pred_map[i_img].squeeze() / self.cfg.LOG_PARA,
+                                          gt_map[i_img] / self.cfg.LOG_PARA, metric_grids=metric_grids)
+                    print('metrics1:', metrics)
 
                     losses.update(self.net.loss.item())
                     maes.update(abs(gt_count - pred_cnt))
@@ -229,7 +237,7 @@ class Trainer:
 
         return best_model
 
-    def validate_V2(self):
+    def validate_v2(self):
         """
         validate_V2 for WE
         """
@@ -296,7 +304,7 @@ class Trainer:
 
         return False
 
-    def validate_V3(self):
+    def validate_v3(self):
         """
         validate_V3 for GCC
         """
@@ -402,9 +410,10 @@ class Trainer:
                     pred_cnt = np.sum(pred_map[i_img]) / self.cfg.LOG_PARA
 
                     metric_grids = [(4, 4)]
-                    metrics = get_metrics_with_points(pred_map[i_img].squeeze() / self.cfg.LOG_PARA, ground_truth, metric_grids=metric_grids)
-                    print('metrics2:',metrics)
-                    
+                    metrics = get_metrics_with_points(pred_map[i_img].squeeze() / self.cfg.LOG_PARA, ground_truth,
+                                                      metric_grids=metric_grids)
+                    print('metrics2:', metrics)
+
                     maes.update(abs(gt_count - pred_cnt))
                     if gt_count == 0.:
                         ape = 100. * abs(gt_count - pred_cnt)
@@ -425,7 +434,6 @@ class Trainer:
                                                               debug=False)
                     mgapes.update(gape)
                     mgcaes.update(gcae)
-
 
         mae = maes.avg
         mape = mapes.avg
