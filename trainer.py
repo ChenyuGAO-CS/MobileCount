@@ -8,7 +8,7 @@ from torch.optim.lr_scheduler import StepLR
 from misc.utils import *
 from models.CC import CrowdCounter
 
-#from iafoule.metrics import get_metrics, get_metrics_with_points
+from iafoule.metrics import get_metrics, get_metrics_with_points
 
 
 class Trainer:
