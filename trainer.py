@@ -176,28 +176,41 @@ class Trainer:
                     pred_cnt = np.sum(pred_map[i_img]) / self.cfg.LOG_PARA
                     gt_count = np.sum(gt_map[i_img]) / self.cfg.LOG_PARA
 
+                    losses.update(self.net.loss.item())
+                    
                     metric_grids = [(4, 4)]
                     metrics = get_metrics(pred_map[i_img].squeeze() / self.cfg.LOG_PARA,
                                           gt_map[i_img] / self.cfg.LOG_PARA, metric_grids=metric_grids)
-                    print('metrics1:', metrics)
+                    #print('metrics1:', metrics)
+                        
+                    maes.update(metrics['absolute_error'])
+                    mapes.update(metrics['absolute_percentage_error'])
+                    mses.update(metrics['squared_error'])
+                    mgapes.update(metrics['grid4x4_absolute_percentage_error'])
+                    mgcaes.update(metrics['grid4x4_cell_absolute_error'])
+                    
+                    #maes.update(abs(gt_count - pred_cnt))
+                    #if gt_count == 0.:
+                    #    ape = 100. * abs(gt_count - pred_cnt)
+                    #else:
+                    #    ape = 100. * abs(gt_count - pred_cnt) / gt_count
+                    #mapes.update(ape)
+                    #mses.update((gt_count - pred_cnt) * (gt_count - pred_cnt))
 
-                    losses.update(self.net.loss.item())
-                    maes.update(abs(gt_count - pred_cnt))
-                    if gt_count == 0.:
-                        ape = 100. * abs(gt_count - pred_cnt)
-                    else:
-                        ape = 100. * abs(gt_count - pred_cnt) / gt_count
-                    mapes.update(ape)
-                    mses.update((gt_count - pred_cnt) * (gt_count - pred_cnt))
+                    #metric_grid = (4, 4)
+                    #gape, gcae = get_grid_metrics(pred_map[i_img].squeeze() / self.cfg.LOG_PARA,
+                    #                              gt_map[i_img] / self.cfg.LOG_PARA,
+                    #                              metric_grid,
+                    #                              debug=False)
+                    #mgapes.update(gape)
+                    #mgcaes.update(gcae)
 
-                    metric_grid = (4, 4)
-                    gape, gcae = get_grid_metrics(pred_map[i_img].squeeze() / self.cfg.LOG_PARA,
-                                                  gt_map[i_img] / self.cfg.LOG_PARA,
-                                                  metric_grid,
-                                                  debug=False)
-                    mgapes.update(gape)
-                    mgcaes.update(gcae)
-
+                    #print('AE:', metrics['absolute_error'], abs(pred_cnt - gt_count))
+                    #print('APE:', metrics['absolute_percentage_error'], ape)
+                    #print('SE:', metrics['squared_error'], ((gt_count - pred_cnt) * (gt_count - pred_cnt)))
+                    #print('GAPE:', metrics['grid4x4_absolute_percentage_error'], gape)
+                    #print('GCAE:', metrics['grid4x4_cell_absolute_error'], gcae)
+                    
                 if vi == -1:  # -1
                     vis_results(self.exp_name, self.epoch, self.writer, self.restore_transform, img, pred_map, gt_map)
 
@@ -408,33 +421,41 @@ class Trainer:
 
                 for i_img in range(pred_map.shape[0]):
                     pred_cnt = np.sum(pred_map[i_img]) / self.cfg.LOG_PARA
-
-                    metric_grids = [(4, 4)]
-                    metrics = get_metrics_with_points(pred_map[i_img].squeeze() / self.cfg.LOG_PARA, ground_truth,
-                                                      metric_grids=metric_grids)
-                    print('metrics2:', metrics)
-
-                    maes.update(abs(gt_count - pred_cnt))
-                    if gt_count == 0.:
-                        ape = 100. * abs(gt_count - pred_cnt)
-                    else:
-                        ape = 100. * abs(gt_count - pred_cnt) / gt_count
-                    mapes.update(ape)
-                    mses.update((gt_count - pred_cnt) * (gt_count - pred_cnt))
-
-                    metric_grid = (4, 4)
+                    
                     width = img.shape[3]
                     height = img.shape[2]
                     ground_truth = [(point['x'].item(), point['y'].item()) for point in gt_points]
+                    metric_grids = [(4, 4)]                   
+                    metrics = get_metrics_with_points(pred_map[i_img].squeeze() / self.cfg.LOG_PARA,
+                                          ground_truth, metric_grids=metric_grids)
 
-                    gape, gcae = get_grid_metrics_with_points(width, height,
-                                                              pred_map[i_img].squeeze() / self.cfg.LOG_PARA,
-                                                              ground_truth,  # gt_count[i_img],
-                                                              metric_grid,
-                                                              debug=False)
-                    mgapes.update(gape)
-                    mgcaes.update(gcae)
+                    maes.update(metrics['absolute_error'])
+                    mapes.update(metrics['absolute_percentage_error'])
+                    mses.update(metrics['squared_error'])
+                    mgapes.update(metrics['grid4x4_absolute_percentage_error'])
+                    mgcaes.update(metrics['grid4x4_cell_absolute_error'])
+                    
+                    #maes.update(abs(gt_count - pred_cnt))
+                    #if gt_count == 0.:
+                    #    ape = 100. * abs(gt_count - pred_cnt)
+                    #else:
+                    #    ape = 100. * abs(gt_count - pred_cnt) / gt_count
+                    #mapes.update(ape)
+                    #mses.update((gt_count - pred_cnt) * (gt_count - pred_cnt))
 
+                    #gape, gcae = get_grid_metrics_with_points(width, height,
+                    #                                          pred_map[i_img].squeeze() / self.cfg.LOG_PARA,
+                    #                                          ground_truth,  # gt_count[i_img],
+                    #                                          metric_grids[0],
+                    #                                          debug=False)
+                    #mgapes.update(gape)
+                    #mgcaes.update(gcae)
+                    #print('AE:', metrics['absolute_error'], abs(pred_cnt - gt_count))
+                    #print('APE:', metrics['absolute_percentage_error'], ape)
+                    #print('SE:', metrics['squared_error'], ((gt_count - pred_cnt) * (gt_count - pred_cnt)))
+                    #print('GAPE:', metrics['grid4x4_absolute_percentage_error'], gape)
+                    #print('GCAE:', metrics['grid4x4_cell_absolute_error'], gcae)
+                    
         mae = maes.avg
         mape = mapes.avg
         mse = np.sqrt(mses.avg)
