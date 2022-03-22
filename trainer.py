@@ -1,10 +1,12 @@
+import sys
+sys.path.append("../ia-foule-lab/")
 from torch import optim
 from torch.autograd import Variable
 from torch.optim.lr_scheduler import StepLR
 
 from misc.utils import *
 from models.CC import CrowdCounter
-
+from iafoule.metrics import *
 
 class Trainer:
     def __init__(self, dataloader, cfg, pwd):
@@ -399,6 +401,10 @@ class Trainer:
                 for i_img in range(pred_map.shape[0]):
                     pred_cnt = np.sum(pred_map[i_img]) / self.cfg.LOG_PARA
 
+                    metric_grids = [(4, 4)]
+                    metrics = get_metrics_with_points(pred_map[i_img].squeeze() / self.cfg.LOG_PARA, ground_truth, metric_grids=metric_grids)
+                    print('metrics2:',metrics)
+                    
                     maes.update(abs(gt_count - pred_cnt))
                     if gt_count == 0.:
                         ape = 100. * abs(gt_count - pred_cnt)
