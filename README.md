@@ -37,18 +37,25 @@ Due to limited spare time and the number of GPUs, I do not plan to conduct some 
 ## Getting Started
 
 ### Preparation
-- python 2.7
-- pyTorch 1.0
-  - Pytorch 1.0 (some networks only support 0.4): http://pytorch.org .
+- python 3.9
+- pyTorch 1.9.0
+  - Pytorch : http://pytorch.org .
   - other libs in ```requirements.txt```, run ```pip install -r requirements.txt```.
 
 
 - Installation
   - Clone this repo:
-    ```
-    git clone https://github.com/SelinaFelton/MobileCount.git
-    ```
-
+   ```
+   git clone https://github.com/iafoule/MobileCount.git
+   ```
+   - Clone the ia-foule-lab repo:
+   ```
+   git clone https://github.com/iafoule/ia-foule-lab.git
+   ```
+   - Add ia-foule-lab packages
+   ```
+   run ```pip install -e ia-foule-lab/```
+   ```
 - Data Preparation
   - In ```./datasets/XXX/readme.md```, download our processed dataset or run the ```prepare_XXX.m/.py``` to generate the desity maps. If you want to directly download all processeed data (including Shanghai Tech, UCF-QNRF, UCF_CC_50 and WorldExpo'10), please visit the [**link**](https://mailnwpueducn-my.sharepoint.com/:f:/g/personal/gjy3035_mail_nwpu_edu_cn/EkxvOVJBVuxPsu75YfYhv9UBKRFNP7WgLdxXFMSeHGhXjQ?e=IdyAzA).
   - Place the processed data to ```../ProcessedData```.
