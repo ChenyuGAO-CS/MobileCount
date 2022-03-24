@@ -12,7 +12,7 @@ __C_DYN.IMAGE_SIZE = None
 __C_DYN.TRAIN_SIZE = (512,672) # For WE
 __C_DYN.LIST_C_DATASETS = [#(CustomGCC, '/workspace/data/GCC'), 
                           #(CustomSHH, '/workspace/data/shanghaiTech/part_A_final/'), 
-                          (CustomSHH, '/workspace/data/shanghaiTech/part_B_final/'),
+                          #(CustomSHH, '/workspace/data/shanghaiTech/part_B_final/'),
                           (CustomWE, '/workspace/data/worldExpo10_blurred'),
                           #(CustomCCLabeler,  '/workspace/cclabeler/'),
 ]

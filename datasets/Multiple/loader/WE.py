@@ -4,6 +4,7 @@ import os
 import numpy as np
 import logging as lg
 import pathlib
+from PIL import Image
 from scipy.sparse import load_npz
 from .dynamics import CustomDataset
 
@@ -31,7 +32,7 @@ class CustomWE(CustomDataset):
 
         json_data = {}
         for n, im in enumerate(img_list):
-            root_dir = Ppathlib.Path(im).parent.parent
+            root_dir = pathlib.Path(im).parent.parent
             filename = pathlib.Path(im).stem
             path_gt = os.path.join(root_dir, 'den', filename + self.gt_format)
             gt_count = None
@@ -42,13 +43,13 @@ class CustomWE(CustomDataset):
                             "folder": self.folder
                             }
         df = pd.DataFrame.from_dict(json_data, orient='index')
+        print("df.shape:",df.shape)
         return df
     
     def load_gt(self, filename):
         
-        data = pd.read_csv(filename, sep=',',header=None).values
-        data = data.astype(np.float32, copy=False)    
-        density_map = Image.fromarray(data)  
+        density_map = pd.read_csv(filename, sep=',',header=None).values
+        density_map = density_map.astype(np.float32, copy=False)    
         
         self.check_density_map(density_map)
         return density_map
