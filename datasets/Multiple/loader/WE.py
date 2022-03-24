@@ -10,27 +10,6 @@ from .dynamics import CustomDataset
 
 class CustomWE(CustomDataset):
     def __init__(self, folder, mode, **kwargs):
-"""
-        if img.mode == 'L':
-        img = img.convert('RGB')
-        
-    train_main_transform = own_transforms.Compose([
-        own_transforms.RandomCrop(cfg_data.TRAIN_SIZE),
-        own_transforms.RandomHorizontallyFlip()
-    ])
-    val_main_transform = None
-    img_transform = standard_transforms.Compose([
-        standard_transforms.ToTensor(),
-        standard_transforms.Normalize(*mean_std)
-    ])
-    gt_transform = standard_transforms.Compose([
-        own_transforms.LabelNormalize(log_para)
-    ])
-    restore_transform = standard_transforms.Compose([
-        own_transforms.DeNormalize(*mean_std),
-        standard_transforms.ToPILImage()
-    ])
-"""
         super().__init__()
         self.val_folder = ['104207','200608','200702','202201','500717']
         self.gt_format = kwargs.get('WE__gt_format', '.csv')
