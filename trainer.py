@@ -180,8 +180,8 @@ class Trainer:
                     
                     metric_grids = [(4, 4)]
                     metrics = get_metrics(pred_map[i_img].squeeze() / self.cfg.LOG_PARA,
-                                          gt_map[i_img] / self.cfg.LOG_PARA, metric_grids=metric_grids)
-                    #print('metrics1:', metrics)
+                                        gt_map[i_img] / self.cfg.LOG_PARA, 
+                                        metric_grids=metric_grids)
                         
                     maes.update(metrics['absolute_error'])
                     mapes.update(metrics['absolute_percentage_error'])
@@ -189,30 +189,15 @@ class Trainer:
                     mgapes.update(metrics['grid4x4_absolute_percentage_error'])
                     mgcaes.update(metrics['grid4x4_cell_absolute_error'])
                     
-                    #maes.update(abs(gt_count - pred_cnt))
-                    #if gt_count == 0.:
-                    #    ape = 100. * abs(gt_count - pred_cnt)
-                    #else:
-                    #    ape = 100. * abs(gt_count - pred_cnt) / gt_count
-                    #mapes.update(ape)
-                    #mses.update((gt_count - pred_cnt) * (gt_count - pred_cnt))
-
-                    #metric_grid = (4, 4)
-                    #gape, gcae = get_grid_metrics(pred_map[i_img].squeeze() / self.cfg.LOG_PARA,
-                    #                              gt_map[i_img] / self.cfg.LOG_PARA,
-                    #                              metric_grid,
-                    #                              debug=False)
-                    #mgapes.update(gape)
-                    #mgcaes.update(gcae)
-
-                    #print('AE:', metrics['absolute_error'], abs(pred_cnt - gt_count))
-                    #print('APE:', metrics['absolute_percentage_error'], ape)
-                    #print('SE:', metrics['squared_error'], ((gt_count - pred_cnt) * (gt_count - pred_cnt)))
-                    #print('GAPE:', metrics['grid4x4_absolute_percentage_error'], gape)
-                    #print('GCAE:', metrics['grid4x4_cell_absolute_error'], gcae)
+                if vi == -1:
                     
-                if vi == -1:  # -1
-                    vis_results(self.exp_name, self.epoch, self.writer, self.restore_transform, img, pred_map, gt_map)
+                    vis_results(self.exp_name,
+                                self.epoch,
+                                self.writer,
+                                self.restore_transform,
+                                img,
+                                pred_map,
+                                gt_map)
 
         mae = maes.avg
         mape = mapes.avg
@@ -258,12 +243,16 @@ class Trainer:
 
         losses = AverageCategoryMeter(5)
         maes = AverageCategoryMeter(5)
-
-        roi_mask = []
+        mapes = AverageCategoryMeter(5)
+        mses = AverageCategoryMeter(5)
+        mgapes = AverageCategoryMeter(5)
+        mgcaes = AverageCategoryMeter(5)
+        
+        #roi_mask = []
         from datasets.WE.setting import cfg_data
-        from scipy import io as sio
-        for val_folder in cfg_data.VAL_FOLDER:
-            roi_mask.append(sio.loadmat(os.path.join(cfg_data.DATA_PATH, 'test', val_folder + '_roi.mat'))['BW'])
+        #from scipy import io as sio
+        #for val_folder in cfg_data.VAL_FOLDER:
+        #    roi_mask.append(sio.loadmat(os.path.join(cfg_data.DATA_PATH, 'test', val_folder + '_roi.mat'))['BW'])
 
         for i_sub, i_loader in enumerate(self.val_loader, 0):
 
@@ -292,30 +281,85 @@ class Trainer:
                         pred_cnt = np.sum(pred_map[i_img]) / self.cfg.LOG_PARA
                         gt_count = np.sum(gt_map[i_img]) / self.cfg.LOG_PARA
 
+                        #losses.update(self.net.loss.item(), i_sub)
+                        #maes.update(abs(gt_count - pred_cnt), i_sub)
+                        
                         losses.update(self.net.loss.item(), i_sub)
-                        maes.update(abs(gt_count - pred_cnt), i_sub)
-                    if vi == 0:
-                        vis_results(self.exp_name, self.epoch, self.writer, self.restore_transform, img, pred_map,
+                    
+                        metric_grids = [(4, 4)]
+                        metrics = get_metrics(pred_map[i_img].squeeze() / self.cfg.LOG_PARA,
+                                            gt_map[i_img] / self.cfg.LOG_PARA, 
+                                            metric_grids=metric_grids)
+                        
+                        maes.update(metrics['absolute_error'], i_sub)
+                        mapes.update(metrics['absolute_percentage_error'], i_sub)
+                        mses.update(metrics['squared_error'], i_sub)
+                        mgapes.update(metrics['grid4x4_absolute_percentage_error'], i_sub)
+                        mgcaes.update(metrics['grid4x4_cell_absolute_error'], i_sub)
+                        
+                    if vi == -1:
+                        vis_results(self.exp_name,
+                                    self.epoch,
+                                    self.writer,
+                                    self.restore_transform,
+                                    img, pred_map,
                                     gt_map)
 
+        #mae = np.average(maes.avg)
+        #loss = np.average(losses.avg)
+
         mae = np.average(maes.avg)
+        mape = np.average(mapes.avg)
+        mse = np.sqrt(np.average(mses.avg))
         loss = np.average(losses.avg)
+        mgape = np.average(mgapes.avg)
+        mgcae = np.average(mgcaes.avg)
+
+        #self.writer.add_scalar('val_loss', loss, self.epoch + 1)
+        #self.writer.add_scalar('mae', mae, self.epoch + 1)
+        #self.writer.add_scalar('mae_s1', maes.avg[0], self.epoch + 1)
+        #self.writer.add_scalar('mae_s2', maes.avg[1], self.epoch + 1)
+        #self.writer.add_scalar('mae_s3', maes.avg[2], self.epoch + 1)
+        #self.writer.add_scalar('mae_s4', maes.avg[3], self.epoch + 1)
+        #self.writer.add_scalar('mae_s5', maes.avg[4], self.epoch + 1)
 
         self.writer.add_scalar('val_loss', loss, self.epoch + 1)
         self.writer.add_scalar('mae', mae, self.epoch + 1)
-        self.writer.add_scalar('mae_s1', maes.avg[0], self.epoch + 1)
-        self.writer.add_scalar('mae_s2', maes.avg[1], self.epoch + 1)
-        self.writer.add_scalar('mae_s3', maes.avg[2], self.epoch + 1)
-        self.writer.add_scalar('mae_s4', maes.avg[3], self.epoch + 1)
-        self.writer.add_scalar('mae_s5', maes.avg[4], self.epoch + 1)
+        self.writer.add_scalar('mape', mape, self.epoch + 1)
+        self.writer.add_scalar('rmse', mse, self.epoch + 1)
+        self.writer.add_scalar('mgape', mgape, self.epoch + 1)
+        self.writer.add_scalar('mgcae', mgcae, self.epoch + 1)
+        
+        #self.train_record = update_model(self.net, self.optimizer, self.scheduler, self.epoch, self.i_tb, self.exp_path,
+        #                                 self.exp_name,[mae, 0, 0, 0, 0, loss], self.train_record, self.log_txt)
 
-        self.train_record = update_model(self.net, self.optimizer, self.scheduler, self.epoch, self.i_tb, self.exp_path,
-                                         self.exp_name,
-                                         [mae, 0, 0, 0, 0, loss], self.train_record, self.log_txt)
+        best_model = False
+        best_metric = 'best_mae'
+        if mae < self.train_record[best_metric]:
+            self.train_record, best_model = update_model(self.net,
+                                                         self.optimizer,
+                                                         self.scheduler,
+                                                         self.epoch,
+                                                         self.i_tb,
+                                                         self.exp_path,
+                                                         self.exp_name,
+                                                         [mae, mape, mse, mgape, mgcae, loss],
+                                                         self.train_record,
+                                                         self.log_txt,
+                                                         best_metric=best_metric)
+            tr = self.train_record
+            table_validation = f"""
+### Table des métriques Validation
+| **Best MAE** | **Best MAPE** | **Best RMSE** | **Best MGAPE** | **Best MGCAE** |
+| ---- | ---- | ---- | ---- | ---- |
+| {tr['best_mae']} | {tr['best_mape']} | {tr['best_mse']} | {tr['best_mgape']} | {tr['best_mgcae']} | 
+"""
+            self.writer.add_text("validation_table", table_validation, global_step=self.epoch + 1)
 
-        print_WE_summary(self.log_txt, self.epoch, [mae, 0, 0, 0, 0, loss], self.train_record, maes)
+        #print_WE_summary(self.log_txt, self.epoch, [mae, 0, 0, 0, 0, loss], self.train_record, maes)
+        print_summary(self.exp_name, [mae, mape, mse, mgape, mgcae, loss], self.train_record)
 
-        return False
+        return best_model
 
     def validate_v3(self):
         """
