@@ -7,7 +7,7 @@ cfg_data = __C_WE
 
 __C_WE.STD_SIZE = (576,720)
 __C_WE.TRAIN_SIZE = (512,672)
-__C_WE.DATA_PATH = './exp/data/WE_blurred'
+__C_WE.DATA_PATH = '/workspace/data/worldExpo10_blurred'
 
 __C_WE.MEAN_STD = ([0.504379212856, 0.510956227779, 0.505369007587], [0.22513884306, 0.225588873029, 0.22579960525])
 

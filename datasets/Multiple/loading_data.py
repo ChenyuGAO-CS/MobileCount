@@ -24,8 +24,13 @@ def loading_data():
         own_transforms.RandomHorizontallyFlip()
     ])
     
-    specific_transform = {"SHHB__transform" : train_main_transform_SHHB }
+    train_main_transform_WE = own_transforms.Compose([
+        own_transforms.RandomCrop(cfg_data.TRAIN_SIZE),
+        own_transforms.RandomHorizontallyFlip()
+    ])
     
+    specific_transform = {"SHHB__transform" : train_main_transform_SHHB, "WE__transform" : train_main_transform_WE}
+
     if specific_transform:
         cfg_data.PATH_SETTINGS.update(specific_transform)
 
