@@ -30,7 +30,7 @@ __C.GRID_TRAIN = {
     #"RESUME_PATH": ['/workspace/share/iafoule/tensorboard/baseline/SHHB_multiple/best_state.pth'],
     # "RESUME_PATH": ['/workspace/home/jourdanfa/mobilecount_GCC_.pth'],
     "MAX_EPOCH": [10],  # default value  = 500 in config.py (cfg)
-    "EXP_PATH": ["./exp"],
+    "EXP_PATH": ["./exp/tranqforms"],
     # "LR": [1e-4],  # default value  = 1e-4 in config.py (cfg)
     # ATTENTION si CUSTOM_LOSS_LAMBDA ou CUSTOM_LOSS_SIZES sont définis alors CUSTOM_LOSS=True , False sinon
     # "CUSTOM_LOSS": [False],
