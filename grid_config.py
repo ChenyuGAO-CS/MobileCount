@@ -5,13 +5,13 @@ import misc.transforms as own_transforms
 TRAIN_SIZE_SHHB = (576, 768)
 
 main_transform_1 = own_transforms.Compose([
-    own_transforms.RandomCrop(cfg_data.TRAIN_SIZE),
+    own_transforms.RandomCrop(TRAIN_SIZE_SHHB),
     own_transforms.ColorJitter(0.3),
     own_transforms.RandomHorizontallyFlip()
 ])
 
 main_transform_2 = own_transforms.Compose([
-    own_transforms.RandomCrop(cfg_data.TRAIN_SIZE),
+    own_transforms.RandomCrop(TRAIN_SIZE_SHHB),
     own_transforms.ColorJitter([0.1, 0.2, 0.3, 0.4, 0.5]),
     own_transforms.RandomHorizontallyFlip()
 ])
