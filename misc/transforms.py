@@ -1,10 +1,21 @@
 import numbers
 import random
 import numpy as np
-from PIL import Image, ImageOps, ImageFilter
+from PIL import Image, ImageOps, ImageFilter, ImageMath
 from config import cfg
 import torch
 # ===============================img tranforms============================
+
+def add_margin(pil_img, new_width, new_height, left, top, color):
+    result = Image.new(pil_img.mode, (new_width, new_height), color)
+    result.paste(pil_img, (left, top))
+    return result
+
+def resize_target(pil_img, tw, th):
+    w, h = pil_img.size
+    ratio_rounded = (h * w ) / (int(tw) * int(th))
+    mask = np.array(pil_img.resize((int(tw) ,int(th)), Image.BOX)) * ratio_rounded
+    return Image.fromarray(mask, 'F')
 
 class Compose(object):
     def __init__(self, transforms):
@@ -41,6 +52,7 @@ class RandomCrop(object):
         else:
             self.size = size
         self.padding = padding
+        self.mean = (115, 114, 110)#(tuple([int(i*255) for i in cfg.MEAN_STD[0]]))
 
     def __call__(self, img, mask):
         if self.padding > 0:
@@ -53,8 +65,8 @@ class RandomCrop(object):
         if w == tw and h == th:
             return img, mask
         if w < tw or h < th:
-            return img.resize((tw, th), Image.BILINEAR), mask.resize((tw, th), Image.NEAREST)
-
+            #return img.resize((tw, th), Image.BILINEAR), resize(mask, tw, th)
+            return add_margin(img, tw,th, 0, 0, color=tuple(self.mean)), add_margin(mask, tw,th, 0, 0, color=0)
         x1 = random.randint(0, w - tw)
         y1 = random.randint(0, h - th)
         return img.crop((x1, y1, x1 + tw, y1 + th)), mask.crop((x1, y1, x1 + tw, y1 + th))
@@ -81,15 +93,14 @@ class FreeScale(object):
         self.size = size  # (h, w)
 
     def __call__(self, img, mask):
-        return img.resize((self.size[1], self.size[0]), Image.NEAREST), mask.resize((self.size[1], self.size[0]), Image.NEAREST)
-
+        return img.resize((self.size[1], self.size[0]), Image.NEAREST), resize_target(mask, self.size[1],  self.size[0])
 
 class ScaleDown(object):
     def __init__(self, size):
         self.size = size  # (h, w)
 
     def __call__(self, mask):
-        return  mask.resize((self.size[1]/cfg.TRAIN.DOWNRATE, self.size[0]/cfg.TRAIN.DOWNRATE), Image.NEAREST)
+        return  resize_target(mask,self.size[1]/cfg.TRAIN.DOWNRATE, self.size[0]/cfg.TRAIN.DOWNRATE)
 
 
 class Scale(object):
@@ -120,7 +131,7 @@ class RandomDownOverSampling(object):
         self.factor = factor
 
     def __call__(self, img, mask):
-        if self.factor < 0 or random.random() > 0.5:
+        if self.factor < 0 :# or random.random() > 0.5:
             return img, mask
         
         if img.size != mask.size:
@@ -128,7 +139,8 @@ class RandomDownOverSampling(object):
             print(mask.size)           
         assert img.size == mask.size
         w, h = img.size
-        return img.resize((int(w / self.factor) ,int(h / self.factor)), Image.BILINEAR).resize((w, h), Image.NEAREST), mask
+        factor = random.choice(range(self.factor)) + 1
+        return img.resize((int(w / factor) ,int(h / factor)), Image.BILINEAR).resize((w, h), Image.NEAREST), mask
 
 class RandomDownSampling(object):
     # Downsampling then upsampling the image to the original size. 
@@ -145,7 +157,7 @@ class RandomDownSampling(object):
             print(mask.size)           
         assert img.size == mask.size
         w, h = img.size
-        return img.resize((int(w / self.factor) ,int(h / self.factor)), Image.BILINEAR) ,  mask.resize((int(w / self.factor) ,int(h / self.factor)), Image.NEAREST)
+        return img.resize((int(w / self.factor) ,int(h / self.factor)), Image.BILINEAR) ,resize_target(mask, int(w / self.factor) ,int(h / self.factor))
        
 # ===============================label tranforms============================
 
