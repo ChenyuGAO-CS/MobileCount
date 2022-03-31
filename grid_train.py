@@ -126,5 +126,5 @@ if __name__ == '__main__':
 
         from trainer import Trainer
 
-        #cc_trainer = Trainer(loading_data, cfg_complete, pwd)
-        #cc_trainer.forward()
+        cc_trainer = Trainer(loading_data, cfg_complete, pwd)
+        cc_trainer.forward()
