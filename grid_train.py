@@ -59,7 +59,7 @@ if __name__ == '__main__':
         # cfg['EXP_NAME'] = EXP_NAME.replace(' ','')
         # train_size = parameters['TRAIN_SIZE']
         # str_train_size = str(train_size[0]) + 'x' + str(train_size[1])
-        cfg['EXP_NAME'] = now + 'WE_' + parameters['PATH_SETTINGS']['SHHB__transform_description']
+        cfg['EXP_NAME'] = now + 'WE_' + parameters['PATH_SETTINGS']['WE__transform_description']
         # cfg['EXP_NAME'] = 'SHHA+SHHB+WE+BACKGROUND'
         # ------------prepare environment------------
         seed = cfg.SEED

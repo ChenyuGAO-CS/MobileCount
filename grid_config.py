@@ -29,7 +29,7 @@ __C.GRID_TRAIN = {
     "RESUME": [False],
     #"RESUME_PATH": ['/workspace/share/iafoule/tensorboard/baseline/SHHB_multiple/best_state.pth'],
     # "RESUME_PATH": ['/workspace/home/jourdanfa/mobilecount_GCC_.pth'],
-    "MAX_EPOCH": [500],  # default value  = 500 in config.py (cfg)
+    "MAX_EPOCH": [10],  # default value  = 500 in config.py (cfg)
     "EXP_PATH": ["./exp"],
     # "LR": [1e-4],  # default value  = 1e-4 in config.py (cfg)
     # ATTENTION si CUSTOM_LOSS_LAMBDA ou CUSTOM_LOSS_SIZES sont définis alors CUSTOM_LOSS=True , False sinon
@@ -47,8 +47,8 @@ __C.GRID_TRAIN = {
     #"LIST_C_DATASETS": [[(CustomWE, '/workspace/data/worldExpo10_blurred')]],
     #"MEAN_STD": [([0.504379212856, 0.510956227779, 0.505369007587], [0.22513884306, 0.225588873029, 0.22579960525])],
     "PATH_SETTINGS": [
-        {'WE__transform_description': 'rcrop+rds2+rdos2+hflip', 'WE__transform': main_transform_1},
-        {'WE__transform_description': 'rds2+rdos2+rcrop+hflip', 'WE__transform': main_transform_2},
+        {'WE__transform_description': 'rcrop+bright0.3+hflip', 'WE__transform': main_transform_1},
+        {'WE__transform_description': 'rcrop+bright0.1-0.5hflip', 'WE__transform': main_transform_2},
     ],
     "TRAIN_SIZE": [TRAIN_SIZE_SHHB],  # default value  = (576,768) like SHHB, WE = (512,672)
 }
