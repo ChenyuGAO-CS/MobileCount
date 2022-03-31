@@ -73,9 +73,9 @@ __C.INFER_GOLDEN_DATASET = True
 __C.L1_LOSS_REDUCTION = "mean"
 
 # Custom LOSS
-__C.CUSTOM_LOSS = False
+__C.CUSTOM_LOSS = True
 __C.CUSTOM_LOSS_LAMBDA = 10
-__C.CUSTOM_LOSS_SIZES = (2, 4)
+__C.CUSTOM_LOSS_SIZES = (2, 4, 8)
 
 #================================================================================
 #================================================================================

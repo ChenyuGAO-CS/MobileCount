@@ -17,20 +17,35 @@ def loading_data():
     # add here specific func : 
     # choose differents combinaison of transformations for each dataset
     
+    train_main_transform_SHHA = own_transforms.Compose([
+        own_transforms.ColorJitter(0.3),
+        own_transforms.RandomHorizontallyFlip()
+    ])
+    
     train_main_transform_SHHB = own_transforms.Compose([
-        own_transforms.RandomDownOverSampling(cfg_data.RANDOM_DOWNOVER_SAMPLING),
-        own_transforms.RandomDownSampling(cfg_data.RANDOM_DOWN_SAMPLING),
+        own_transforms.ColorJitter(cfg_data.BRIGHTNESS_JITTER),
         own_transforms.RandomCrop(cfg_data.TRAIN_SIZE),
+        own_transforms.RandomDownOverSampling(cfg_data.RANDOM_DOWNOVER_SAMPLING),
+        #own_transforms.RandomDownSampling(cfg_data.RANDOM_DOWN_SAMPLING),
         own_transforms.RandomHorizontallyFlip()
     ])
     
     train_main_transform_WE = own_transforms.Compose([
         own_transforms.RandomCrop(cfg_data.TRAIN_SIZE),
+        own_transforms.ColorJitter(0.3),
         own_transforms.RandomHorizontallyFlip()
     ])
     
-    specific_transform = {"SHHB__transform" : train_main_transform_SHHB, "WE__transform" : train_main_transform_WE}
-
+    train_main_transform_GCC = own_transforms.Compose([
+        own_transforms.ColorJitter(0.3),
+        own_transforms.RandomHorizontallyFlip()
+    ])
+    
+    specific_transform = {"SHHA__transform" : train_main_transform_SHHA,
+                          "SHHB__transform" : train_main_transform_SHHB,
+                          "WE__transform" : train_main_transform_WE,
+                          "GCC__transform" : train_main_transform_GCC}
+    
     if specific_transform:
         cfg_data.PATH_SETTINGS.update(specific_transform)
 
@@ -48,6 +63,11 @@ def loading_data():
         own_transforms.LabelNormalize(log_para)
     ])
 
+    restore_transform = standard_transforms.Compose([
+        own_transforms.DeNormalize(*mean_std),
+        standard_transforms.ToPILImage()
+    ])
+        
     train_set = DynamicDataset(couple_datasets=cfg_data.LIST_C_DATASETS,
                               mode='train',
                               main_transform=train_main_transform,
@@ -77,7 +97,7 @@ def loading_data():
                             shuffle=True, 
                             drop_last=False)
 
-    return train_loader, val_loader, None
+    return train_loader, val_loader, restore_transform
 
 
 

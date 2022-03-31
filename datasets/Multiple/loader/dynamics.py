@@ -88,6 +88,7 @@ class DynamicDataset(Dataset):
                                               "img": loader.read_image,
                                               "transform": loader.transform}
         self.dataset = self.dataset.reset_index(drop=True)
+        print(f'DynamicDataset - mode:{self.mode} - dataset.shape:{self.dataset.shape}')
 
 
 class CustomDataset:

@@ -37,6 +37,7 @@ class CustomGCC(CustomDataset):
                            "folder": self.folder
                             }
         df = pd.DataFrame.from_dict(json_data, orient='index')
+        print(f'CustomGCC - mode:{self.mode} - df.shape:{df.shape}')
         return df
     
     def load_gt(self, filename):

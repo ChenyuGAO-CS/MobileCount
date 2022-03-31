@@ -8,8 +8,7 @@ __C_DYN = edict()
 cfg_data = __C_DYN
 
 __C_DYN.IMAGE_SIZE = None
-#__C_DYN.TRAIN_SIZE = (576,768)
-__C_DYN.TRAIN_SIZE = (512,672) # For WE
+__C_DYN.TRAIN_SIZE = (576,768) # SHHB sizes (576,768)
 __C_DYN.LIST_C_DATASETS = [#(CustomGCC, '/workspace/data/GCC'), 
                           #(CustomSHH, '/workspace/data/shanghaiTech/part_A_final/'), 
                           #(CustomSHH, '/workspace/data/shanghaiTech/part_B_final/'),

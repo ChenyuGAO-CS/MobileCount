@@ -12,18 +12,22 @@ from .dynamics import CustomDataset
 class CustomCCLabeler(CustomDataset):
     def __init__(self, folder, mode, **kwargs):
         super().__init__()
-        # like: '/workspace/cclabeler/users/golden.json' for Golden
-        # or '/workspace/cclabeler/users/user4.json' or Background
+        # like '/workspace/cclabeler/users/golden.json' for Golden
+        # or '/workspace/cclabeler/users/Background.json' or Background
         self.gt_index_filepath = kwargs.get('CC__index_filepath', None)
         
         if self.gt_index_filepath is None:
             raise ValueError('Must specify `CC__index_filepath` parameter')
         
+        self.subset = ''
         if 'background' in self.gt_index_filepath:
+            self.subset = 'background'
             self.gt_path = kwargs.get('BG__gt_path', None)
             self.gt_format = kwargs.get('BG__gt_format', '.json')
             self.transform = kwargs.get('BG__transform', None)
         elif 'golden' in self.gt_index_filepath:
+            self.subset = 'golden'
+            self.gt_path = kwargs.get('GD__gt_path', None)            
             self.transform = kwargs.get('GD__transform', None)
             self.gt_format = kwargs.get('GD__gt_format', '.json')
         else:
@@ -36,6 +40,7 @@ class CustomCCLabeler(CustomDataset):
             self.dataset = pd.DataFrame([])
             return
         self.dataset = self.read_index()
+
         
     def read_index(self):
         with open(self.gt_index_filepath, 'r', encoding='utf-8') as f:
@@ -59,6 +64,7 @@ class CustomCCLabeler(CustomDataset):
             except Exception as e:
                 lg.warning(f'Cannot read image: {image_path}, error: {str(e)}')
         df = pd.DataFrame.from_dict(json_data, orient='index')
+        print(f'CustomCCLabeler - subset:{self.subset} - mode:{self.mode} - df.shape:{df.shape}')
         return df
     
     def load_gt(self, filename):

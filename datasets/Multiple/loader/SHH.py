@@ -14,11 +14,14 @@ class CustomSHH(CustomDataset):
         Load Custom SHH
         """
         super().__init__()
+        self.subset = ''
         if '_A_' in folder:
+            self.subset = 'SHHA'
             self.gt_name_folder = kwargs.get('SHHA__gt_name_folder', 'maps_adaptive_kernel') 
             self.gt_format = kwargs.get('SHHA__gt_format', '.h5')
             self.transform = kwargs.get('SHHA__transform', None)
         elif '_B_' in folder:
+            self.subset = 'SHHB'
             self.gt_name_folder = kwargs.get('SHHB__gt_name_folder', 'maps_fixed_kernel') 
             self.gt_format = kwargs.get('SHHB__gt_format', '.h5')
             self.transform = kwargs.get('SHHB__transform', None)
@@ -46,6 +49,7 @@ class CustomSHH(CustomDataset):
                             "folder": self.folder
                             }
         df = pd.DataFrame.from_dict(json_data, orient='index')
+        print(f'CustomSHH - subset:{self.subset} - mode:{self.mode} - df.shape:{df.shape}')        
         return df
             
     def load_gt(self, filename):
